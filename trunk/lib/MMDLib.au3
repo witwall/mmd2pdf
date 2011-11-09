@@ -76,7 +76,7 @@ Func TXT2HTML($inTXT)
 			ContinueLoop
 		EndIf
 
-		If $line = "[ditaa]" Then
+		If $line = "[DITAA]" Then
 			$image += 1
 			$tempDIA = @TempDir & "\MMDWin\image" & $image
 
@@ -148,75 +148,104 @@ Func ReadFiles($files)
 	Return Text2HTML($Text)
 EndFunc
 
+Func HTMLHeader()
+	Local $Header
+
+	; Write the Base Header - This is needed to include Images in the document directory
+	; Path must end with "\"
+	$Header = 'HTML Header: <base href="' & $DIR & "\" & '" />  ' & @CRLF
+	;FileWriteLine($out, 'HTML Header: <base href="' & $DIR & "\" & '" />  ')
+
+	; Write CSS, overruled by CSS in MMD definition
+	$Header &= 'CSS: ' & $CSS & @CRLF
+	;FileWriteLine($out, 'CSS: ' & $CSS)
+
+	; MMD Header in text?
+;	If StringRegExp($pageList[$page], '^\w*:.*') <> 1 Then
+;		If StringRegExp($MMDHEADER, 'Title:') <> 1 Then
+			$Header &= "Title: " & StringUpper(StringLeft($DOCNAME, 1)) & StringMid($DOCNAME, 2) & "  " & @CRLF
+			;FileWriteLine($out, "Title: " & StringUpper(StringLeft($DOCNAME, 1)) & StringMid($DOCNAME, 2) & "  ")
+;		EndIf
+		$Header &= $MMDHEADER & @CRLF
+		;FileWriteLine($out, $MMDHEADER)
+;	EndIf
+	Return $Header
+EndFunc
+
 Func Text2HTML($inTXT)
-	Local $out, $dia, $line, $Header, $tempTXT, $tempHTML, $tempDIA, $fileList, $page = 0, $image = 0
+	Local $out, $dia, $line, $lines, $tempTXT, $tempHTML, $tempDIA, $fileList, $page = 1, $image = 0, $newFile = 0
 
-	; Split text on $PAGEBREAK
-	$pageList = StringSplit($inTXT, $PAGEBREAK & @CRLF, 1)
-ConsoleWrite($pageList[0])
-	For $page = 1 To $pageList[0]
+	$tempTXT = @TempDir & "\MMDWin\Temp" & $page & ".txt"
+	$tempHTML = @TempDir & "\MMDWin\Temp" & $page & ".html"
+	; Don't use full path (CSS)
+	$fileList &= "Temp" & $page & ".html "
 
-		$tempTXT = @TempDir & "\MMDWin\Temp" & $page & ".txt"
-		$tempHTML = @TempDir & "\MMDWin\Temp" & $page & ".html"
-        ; Don't use full path (CSS)
-		$fileList &= "Temp" & $page & ".html "
+	$out = FileOpen($tempTXT, 2 + 8 + 256) ;Write New, Create Dir, UTF-8 (No BOM)
 
-		$out = FileOpen($tempTXT, 2 + 8 + 256) ;Write New, Create Dir, UTF-8 (No BOM)
+	If $out = -1 Then
+		MsgBox(0, $APPTITLE, "Could not create " & $tempTXT)
+		Exit
+	EndIf
 
-		If $out = -1 Then
-			MsgBox(0, $APPTITLE, "Error opening " & $tempTXT)
-			Exit
-		EndIf
+	FileWriteLine($out, HTMLHeader())
+	FileWriteLine($out, "")
 
-		; Write the Base Header - This is needed to include Images in the document directory
-		; Path must end with "\"
-		$Header = 'HTML Header: <base href="' & $DIR & "\" & '" />  ' & @CRLF
-		;FileWriteLine($out, 'HTML Header: <base href="' & $DIR & "\" & '" />  ')
+	; Split text in lines on CRLF
+	$lines = StringSplit($inTXT, @CRLF, 1)
 
-		; Write CSS, overruled by CSS in MMD definition
-		$Header &= 'CSS: ' & $CSS & @CRLF
-		;FileWriteLine($out, 'CSS: ' & $CSS)
+	For $i = 1 To $lines[0]
+		$line = $lines[$i]
 
-		; MMD Header in text?
-		If StringRegExp($pageList[$page], '^\w*:.*') <> 1 Then
-			If StringRegExp($MMDHEADER, 'Title:') <> 1 Then
-				$Header &= "Title: " & StringUpper(StringLeft($DOCNAME, 1)) & StringMid($DOCNAME, 2) & "  " & @CRLF
-				;FileWriteLine($out, "Title: " & StringUpper(StringLeft($DOCNAME, 1)) & StringMid($DOCNAME, 2) & "  ")
-			EndIf
-			$Header &= $MMDHEADER & @CRLF
-			;FileWriteLine($out, $MMDHEADER)
-		EndIf
-
-		FileWriteLine($out, $Header)
-		FileWriteLine($out, "")
-
-		; Read in lines of text until the end is reached
-		$linePos = 1
-		While 1
-			$linePosEnd = StringInStr($pageList[$page], @CRLF, 2, 1, $linePos) - 1
-			If $linePosEnd < 0 Then $linePosEnd = StringLen($pageList[$page])
-			$line = StringMid($pageList[$page], $linePos, $linePosEnd - $linePos + 1)
-
-			;ConsoleWrite($linePos & "-" & $line & @CRLF)
-
-			If $OUTPUT = "pdf" Then
-				$line = Encode($line)
-			EndIf
-
-			If $NEWLINE Then $line &= "  " ; break - end line with 2 spaces
-			FileWriteLine($out, $line)
-
-			If Not StringInStr($pageList[$page], @CRLF, 2, 1, $linePos) Then
-				ExitLoop
+		; Find Include HTML
+		If StringLeft($line, 9) = "[WEBPAGE=" Then
+			$url = StringMid($line, 10, StringLen($line) - 10)
+ConsoleWrite($url & @CRLF)
+			$succ = InetGet($url, @TempDir & "\MMDWin\Temp" & $page + 1 & ".html", 1)
+			If $succ Then
+				$newFile = 1
+				$page = $page + 1
+				$fileList &= "Temp" & $page & ".html "
 			Else
-				$linePos = $linePosEnd + 3
+				$line="<" & $url & ">" & @CRLF
 			EndIf
-		WEnd
+		EndIf
 
-		FileClose($out)
+		; Split text on $PAGEBREAK
+		If $line = $PAGEBREAK & @CRLF Or $newFile Then
+			FileClose($out)
+			MMD($tempTXT, $tempHTML)
 
-		MMD($tempTXT, $tempHTML)
+			$page = $page + 1
+			$tempTXT = @TempDir & "\MMDWin\Temp" & $page & ".txt"
+			$tempHTML = @TempDir & "\MMDWin\Temp" & $page & ".html"
+			; Don't use full path (CSS)
+			$fileList &= "Temp" & $page & ".html "
+
+			$out = FileOpen($tempTXT, 2 + 8 + 256) ;Write New, Create Dir, UTF-8 (No BOM)
+
+			If $out = -1 Then
+				MsgBox(0, $APPTITLE, "Could not create " & $tempTXT)
+				Exit
+			EndIf
+
+			FileWriteLine($out, HTMLHeader())
+			FileWriteLine($out, "")
+
+			ContinueLoop
+		EndIf
+
+		If $OUTPUT = "pdf" Then
+			$line = Encode($line)
+		EndIf
+
+		If $NEWLINE Then $line &= "  " ; break - end line with 2 spaces
+		FileWriteLine($out, $line)
+
 	Next
+	FileClose($out)
+	MMD($tempTXT, $tempHTML)
+
+	ConsoleWrite($page & " Pages" & @CRLF)
 
     ; Don't use full path (CSS)
 	Return StringStripWS($fileList, 2)
