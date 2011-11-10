@@ -2,6 +2,7 @@
 
 Func Setup()
 	If Not FileExists(@ScriptDir & "\mmd") Then
+		ConsoleWrite("Setting up MMD..." & @CRLF)
 		If Not DirCreate(@ScriptDir & "\mmd") Then
 			ConsoleWrite("Could not create directory " & @ScriptDir & "\mmd")
 		EndIf
@@ -14,6 +15,7 @@ Func Setup()
 	EndIf
 
 	If Not FileExists(@ScriptDir & "\wkhtmltopdf") Then
+		ConsoleWrite("Setting up WKHTMLTOPDF..." & @CRLF)
 		If Not DirCreate(@ScriptDir & "\wkhtmltopdf") Then
 			ConsoleWrite("Could not create directory " & @ScriptDir & "\wkhtmltopdf")
 		EndIf
@@ -32,6 +34,7 @@ Func Setup()
 	EndIf
 
 	If Not FileExists(@ScriptDir & "\templates") Then
+		ConsoleWrite("Creating Templates..." & @CRLF)
 		If Not DirCreate(@ScriptDir & "\templates") Then
 			ConsoleWrite("Could not create directory " & @ScriptDir & "\templates")
 		EndIf

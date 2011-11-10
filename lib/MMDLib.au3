@@ -143,7 +143,7 @@ Func ReadFiles($files)
 		FileClose($in)
 	Next
 
-	ConsoleWrite($Text)
+	;ConsoleWrite($Text)
 
 	Return Text2HTML($Text)
 EndFunc
@@ -175,6 +175,7 @@ EndFunc
 Func Text2HTML($inTXT)
 	Local $out, $dia, $line, $lines, $tempTXT, $tempHTML, $tempDIA, $fileList, $page = 1, $image = 0, $newFile = 0
 
+	ConsoleWrite("Creating HTML " & $page & "..." & @CRLF)
 	$tempTXT = @TempDir & "\MMDWin\Temp" & $page & ".txt"
 	$tempHTML = @TempDir & "\MMDWin\Temp" & $page & ".html"
 	; Don't use full path (CSS)
@@ -199,7 +200,7 @@ Func Text2HTML($inTXT)
 		; Find Include HTML
 		If StringLeft($line, 9) = "[WEBPAGE=" Then
 			$url = StringMid($line, 10, StringLen($line) - 10)
-ConsoleWrite($url & @CRLF)
+			ConsoleWrite("Downloading " & $url & "..." & @CRLF)
 			$succ = InetGet($url, @TempDir & "\MMDWin\Temp" & $page + 1 & ".html", 1)
 			If $succ Then
 				$newFile = 1
@@ -216,6 +217,7 @@ ConsoleWrite($url & @CRLF)
 			MMD($tempTXT, $tempHTML)
 
 			$page = $page + 1
+			ConsoleWrite("Creating HTML " & $page & "..." & @CRLF)
 			$tempTXT = @TempDir & "\MMDWin\Temp" & $page & ".txt"
 			$tempHTML = @TempDir & "\MMDWin\Temp" & $page & ".html"
 			; Don't use full path (CSS)
@@ -244,8 +246,6 @@ ConsoleWrite($url & @CRLF)
 	Next
 	FileClose($out)
 	MMD($tempTXT, $tempHTML)
-
-	ConsoleWrite($page & " Pages" & @CRLF)
 
     ; Don't use full path (CSS)
 	Return StringStripWS($fileList, 2)
@@ -303,6 +303,7 @@ Func HTML2PDF($inHTMLs, $outPDF)
 	;Set working directory to HTML File for included files!
 	FileChangeDir(@TempDir & "\MMDWin")
 
+	ConsoleWrite("Creating PDF..." & @CRLF)
 	; Debug: RunWait(@ComSpec & " /k " & '"' & $HTML2PDFEXE & '" ' & $WKPARAMS, $DIR)
 	ShellExecuteWait($HTML2PDFEXE, $WKPARAMS, @TempDir & "\MMDWin", "Open", @SW_HIDE)
 EndFunc   ;==>HTML2PDF
