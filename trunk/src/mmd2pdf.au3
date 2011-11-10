@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=multimarkdown, wkhtml2pdf
 #AutoIt3Wrapper_Res_Description=MultiMarkDown to PDF Converter
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.179
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.187
 #AutoIt3Wrapper_Res_FileVersion_AutoIncrement=y
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Au3Check_Parameters=-d
@@ -62,11 +62,11 @@ If $cmdline[0] > 0 Then
 		EndIf
 	Next
 Else
-	ConsoleWrite("mmd2pdf markdownfile.txt [textfile2.txt ...]")
+	ConsoleWrite($APPTITLE & " multimarkdownfile.txt [textfile2.txt ...]")
 	Exit
 EndIf
 
-MsgBox(0x1010, $APPTITLE, "File(s):" & @CRLF & @CRLF & $INFILES)
+ConsoleWrite("File(s): " & $INFILES)
 
 getIni()
 
@@ -81,7 +81,7 @@ EndIf
 
 $tempFiles = ReadFiles($INFILES)
 
-ConsoleWrite($tempFiles & @CRLF)
+;ConsoleWrite($tempFiles & @CRLF)
 ; add include http:// to tempfiles
 
 HTML2PDF($tempFiles, $PDFFILE)
