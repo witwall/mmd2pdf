@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=multimarkdown, wkhtml2pdf
 #AutoIt3Wrapper_Res_Description=MultiMarkDown to PDF Converter
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.187
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.197
 #AutoIt3Wrapper_Res_FileVersion_AutoIncrement=y
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Au3Check_Parameters=-d
@@ -18,7 +18,7 @@ Opt("TrayMenuMode", 1) ; Default tray menu items (Script Paused/Exit) will not b
 Global Const $APPTITLE = "MMD2PDF"
 Global $MMDEXE = @ScriptDir & '\mmd\multimarkdown.exe'
 Global $HTML2PDFEXE = @ScriptDir & '\wkhtmltopdf\wkhtmltopdf.exe'
-Global $DIR = @ScriptDir & '\Test'
+Global $DIR = @ScriptDir
 Global $DOCNAME = "Test"
 Global $INFILES = ""
 Global $PDFFILE = @ScriptDir & "\Test\" & $DOCNAME & ".pdf"
@@ -37,7 +37,7 @@ Global $OFFICE = "";
 #include "..\lib\Setup.au3"
 #include "..\lib\Manual.au3"
 
-Dim $path, $i, $aPath, $pages = 0, $tempFiles
+Dim $path, $fullPath, $i, $aPath, $pages = 0, $tempFiles
 
 Setup()
 Manual()
@@ -66,7 +66,7 @@ Else
 	Exit
 EndIf
 
-ConsoleWrite("File(s): " & $INFILES)
+;ConsoleWrite("File(s): " & $INFILES)
 
 getIni()
 
