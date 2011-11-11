@@ -173,7 +173,7 @@ Func HTMLHeader()
 EndFunc
 
 Func Text2HTML($inTXT)
-	Local $out, $dia, $line, $lines, $tempTXT, $tempHTML, $tempDIA, $fileList, $page = 1, $image = 0, $newFile = 0
+	Local $out, $url, $succ, $dia, $line, $lines, $tempTXT, $tempHTML, $tempDIA, $fileList, $page = 1, $image = 0, $newFile = 0
 
 	ConsoleWrite("Creating HTML " & $page & "..." & @CRLF)
 	$tempTXT = @TempDir & "\MMDWin\Temp" & $page & ".txt"
@@ -213,6 +213,7 @@ Func Text2HTML($inTXT)
 
 		; Split text on $PAGEBREAK
 		If $line = $PAGEBREAK & @CRLF Or $newFile Then
+			$newFile = 0
 			FileClose($out)
 			MMD($tempTXT, $tempHTML)
 
@@ -293,6 +294,8 @@ Func DITAA($inTXT, $inImage)
 EndFunc   ;==>DITAA
 
 Func HTML2PDF($inHTMLs, $outPDF)
+	local $tempDir
+
 	; wkhtmltopdf --print-media-type --margin-top 4mm --margin-bottom 4mm --margin-right 0mm --margin-left 0mm --encoding A4 --page-size A4 --orientation Portrait --redirect-delay 100 test1.html test.pdf
 
 	; TO USE CSS don't use full path for HTML Files!
@@ -301,11 +304,15 @@ Func HTML2PDF($inHTMLs, $outPDF)
 
 	;MsgBox(0x1010, $APPTITLE, "WK Params:" & @CRLF & @CRLF & $WKPARAMS & @CRLF & @CRLF & $DIR)
 	;Set working directory to HTML File for included files!
+	$tempDir = @WorkingDir
 	FileChangeDir(@TempDir & "\MMDWin")
 
 	ConsoleWrite("Creating PDF..." & @CRLF)
 	; Debug: RunWait(@ComSpec & " /k " & '"' & $HTML2PDFEXE & '" ' & $WKPARAMS, $DIR)
 	ShellExecuteWait($HTML2PDFEXE, $WKPARAMS, @TempDir & "\MMDWin", "Open", @SW_HIDE)
+
+	FileChangeDir($tempDir)
+	FileDelete(@TempDir & "\MMDWin")
 EndFunc   ;==>HTML2PDF
 
 Func getIni()
