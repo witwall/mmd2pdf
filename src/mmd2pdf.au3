@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=multimarkdown, wkhtml2pdf
 #AutoIt3Wrapper_Res_Description=MultiMarkDown to PDF Converter
-#AutoIt3Wrapper_Res_Fileversion=0.1.0.197
+#AutoIt3Wrapper_Res_Fileversion=0.1.0.199
 #AutoIt3Wrapper_Res_FileVersion_AutoIncrement=y
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Au3Check_Parameters=-d

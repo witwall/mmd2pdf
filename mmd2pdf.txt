@@ -1,0 +1,28 @@
+#MMD2PDF
+
+![MMD 2 PDF](mmd2pdf.jpg 'MMD2PDF Icon')
+
+MMD2PDF converts MMD to PDF, adding a few extra's like options to include webpages and support for page-breaks.
+It is a portable utility, it will leave no traces in registry.
+
+##Pagebreak
+To start Text at the beginning of a page a pagebreak kan be used.
+The pagebreak is : " & $PAGEBREAK & " on a seperate line.
+
+[MultiMarkdown Readme]: http://fletcher.freeshell.org/wiki/MultiMarkdown 'MultiMarkdown Readme'
+Some simple examples of Markdown:
+*Italic*, **Bold**, _italic_, __bold__, ***Italic & Bold (3 stars)***.
+
+[PAGEBREAK]
+Table 1 - Tools
+
+Utility                 | Language      | Document | Extension
+----------------------- | :-----------: | :------: | -:
+MultiMarkDown           | C++           | html     | html
+wkhtmltopdf             | C++           | pdf      | pdf
+
+
+[MultiMarkDown](http://fletcher.github.com/peg-multimarkdown)
+[wkhtmltopdf](http://madalgo.au.dk/~jakobt/wkhtmltoxdoc/wkhtmltopdf-0.9.9-doc.html)
+
+[WEBPAGE=http://code.google.com/p/mmd2pdf]
