@@ -58,9 +58,15 @@ Func Setup()
 		EndIf
 	EndIf
 
+	If Not FileExists(@ScriptDir & "\mmd2pdf.txt") Then
+		If Not FileInstall("..\mmd2pdf.txt", @ScriptDir & "\mmd2pdf.txt") Then
+			ConsoleWrite("Could not install mmd2pdf.txt into " & @ScriptDir)
+		EndIf
+	EndIf
+
 	If Not FileExists(@ScriptDir & "\mmd2pdf.jpg") Then
 		If Not FileInstall("..\mmd2pdf.jpg", @ScriptDir & "\mmd2pdf.jpg") Then
-			ConsoleWrite("Could not install mmd2pdf.jpg into " & @ScriptDir & "\mmd2pdf.jpg")
+			ConsoleWrite("Could not install mmd2pdf.jpg into " & @ScriptDir)
 		EndIf
 	EndIf
 
