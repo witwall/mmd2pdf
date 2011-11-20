@@ -58,6 +58,18 @@ Func Setup()
 		EndIf
 	EndIf
 
+	If Not FileExists(@ScriptDir & "\templates\presentation.css") Then
+		If Not FileInstall("..\templates\presentation.css", @ScriptDir & "\templates\presentation.css") Then
+			ConsoleWrite("Could not install presentation.css into " & @ScriptDir & "\templates")
+		EndIf
+	EndIf
+
+	If Not FileExists(@ScriptDir & "\templates\presentation.jpg") Then
+		If Not FileInstall("..\templates\presentation.jpg", @ScriptDir & "\templates\presentation.jpg") Then
+			ConsoleWrite("Could not install presentation.jpg into " & @ScriptDir & "\templates")
+		EndIf
+	EndIf
+
 	If Not FileExists(@ScriptDir & "\mmd2pdf.txt") Then
 		If Not FileInstall("..\mmd2pdf.txt", @ScriptDir & "\mmd2pdf.txt") Then
 			ConsoleWrite("Could not install mmd2pdf.txt into " & @ScriptDir)

@@ -1,3 +1,6 @@
+Title:				MMD2PDF Manual  
+Author:				Legobas
+
 #MMD2PDF
 
 ![MMD 2 PDF](mmd2pdf.jpg 'MMD2PDF Icon')
@@ -7,11 +10,28 @@ It is a portable utility, it will leave no traces in registry.
 
 ##Pagebreak
 To start Text at the beginning of a page a pagebreak kan be used.
-The pagebreak is : " & $PAGEBREAK & " on a seperate line.
+The pagebreak is : [PAGEBREAK] on a seperate line.
 
 [MultiMarkdown Readme]: http://fletcher.freeshell.org/wiki/MultiMarkdown 'MultiMarkdown Readme'
+
 Some simple examples of Markdown:
 *Italic*, **Bold**, _italic_, __bold__, ***Italic & Bold (3 stars)***.
+
+##Mathematical symbols
+<< e^(i pi) + 1 = 0 [Euler's identity]>>
+
+<< x_(1,2) = (-b+-sqrt(b^2-4ac))/(2a) [quadratic equation solution]>>
+
+You can also include formulas within a sentence, such as
+<<x^2 + y^2 = 1>>.  You can then make a reference to
+[Euler's identity].
+
+    Big Oh notation: Just use O(g(n))
+    Big Theta notation: f in \Theta(g(n))
+    Big omega notation: f in \Omega(g(n))
+    Ceiling (upper value): \lceil(n/2)\rceil
+    Floor (lower value): \lfloor(n/2)\rfloor
+
 
 [PAGEBREAK]
 Table 1 - Tools
