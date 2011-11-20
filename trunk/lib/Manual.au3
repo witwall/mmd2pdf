@@ -1,7 +1,7 @@
 #include-once
 
 Func Manual()
-	Local $Text, $file = @ScriptDir & "\mmd2pdf.txt"
+	Local $Text, $in, $file = @ScriptDir & "\mmd2pdf.txt"
 
 	If Not FileExists(@ScriptDir & "\mmd2pdf.pdf") Then
 		ConsoleWrite("Creating Manual..." & @CRLF)

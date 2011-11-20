@@ -11,8 +11,8 @@ Func TXT2HTML($inTXT)
 		Exit
 	EndIf
 
-	$tempTXT = @TempDir & "\MMDWin\Temp" & $page & ".txt"
-	$tempHTML = @TempDir & "\MMDWin\Temp" & $page & ".html"
+	$tempTXT = @TempDir & "\MMD2PDF\Temp" & $page & ".txt"
+	$tempHTML = @TempDir & "\MMD2PDF\Temp" & $page & ".html"
 
 	$out = FileOpen($tempTXT, 2 + 8 + 256) ;Write New, Create Dir, UTF-8 (No BOM)
 
@@ -62,8 +62,8 @@ Func TXT2HTML($inTXT)
 
 				MMD($tempTXT, $tempHTML)
 
-				$tempTXT = @TempDir & "\MMDWin\Temp" & $page & ".txt"
-				$tempHTML = @TempDir & "\MMDWin\Temp" & $page & ".html"
+				$tempTXT = @TempDir & "\MMD2PDF\Temp" & $page & ".txt"
+				$tempHTML = @TempDir & "\MMD2PDF\Temp" & $page & ".html"
 
 				$out = FileOpen($tempTXT, 2 + 8 + 256) ;Write New, Create Dir, UTF-8 (No BOM)
 				If $out = -1 Then
@@ -78,7 +78,7 @@ Func TXT2HTML($inTXT)
 
 		If $line = "[DITAA]" Then
 			$image += 1
-			$tempDIA = @TempDir & "\MMDWin\image" & $image
+			$tempDIA = @TempDir & "\MMD2PDF\image" & $image
 
 			$dia = FileOpen($tempDIA & ".txt", 2 + 8 + 256) ;Write New, Create Dir, UTF-8 (No BOM)
 			If $dia = -1 Then
@@ -123,10 +123,12 @@ EndFunc   ;==>TXT2HTML
 Func ReadFiles($files)
 	Local $Text, $i, $in, $fileList
 
+	If $TEST Then ConsoleWrite("Files: " & $files & @CRLF)
+
 	$fileList = StringSplit($files, """ """, 1)
 	For $i = 1 To $fileList[0]
 		; open File
-		$in = FileOpen(StringReplace($fileList[$i],"""","", 0))
+		$in = FileOpen(StringReplace($fileList[$i],"""",""), 16384) ; UTF8 BOM Check
 
 		If $in = -1 Then
 			ConsoleWriteError("Error opening " & $fileList[$i])
@@ -134,7 +136,12 @@ Func ReadFiles($files)
 		EndIf
 
 		; Read text
-		$Text &= FileRead($in)
+		While 1
+			$Text &= FileReadLine($in) & @CRLF
+			If @error = -1 Then ExitLoop
+		WEnd
+
+		; $Text &= FileRead($in)
 
 		If $i < $fileList[0] Then
 			$Text &= $PAGEBREAK & @CRLF
@@ -143,56 +150,18 @@ Func ReadFiles($files)
 		FileClose($in)
 	Next
 
-	;ConsoleWrite($Text)
+	If $TEST Then ConsoleWrite($Text)
 
 	Return Text2HTML($Text)
 EndFunc
 
-Func HTMLHeader()
-	Local $Header
-
-	; Write the Base Header - This is needed to include Images in the document directory
-	; Path must end with "\"
-	$Header = 'HTML Header: <base href="' & $DIR & "\" & '" />  ' & @CRLF
-	;FileWriteLine($out, 'HTML Header: <base href="' & $DIR & "\" & '" />  ')
-
-	; Write CSS, overruled by CSS in MMD definition
-	$Header &= 'CSS: ' & $CSS & @CRLF
-	;FileWriteLine($out, 'CSS: ' & $CSS)
-
-	; MMD Header in text?
-;	If StringRegExp($pageList[$page], '^\w*:.*') <> 1 Then
-;		If StringRegExp($MMDHEADER, 'Title:') <> 1 Then
-			$Header &= "Title: " & StringUpper(StringLeft($DOCNAME, 1)) & StringMid($DOCNAME, 2) & "  " & @CRLF
-			;FileWriteLine($out, "Title: " & StringUpper(StringLeft($DOCNAME, 1)) & StringMid($DOCNAME, 2) & "  ")
-;		EndIf
-		$Header &= $MMDHEADER & @CRLF
-		;FileWriteLine($out, $MMDHEADER)
-;	EndIf
-	Return $Header
-EndFunc
-
 Func Text2HTML($inTXT)
-	Local $out, $url, $succ, $dia, $line, $lines, $tempTXT, $tempHTML, $tempDIA, $fileList, $page = 1, $image = 0, $newFile = 0
-
-	ConsoleWrite("Creating HTML " & $page & "..." & @CRLF)
-	$tempTXT = @TempDir & "\MMDWin\Temp" & $page & ".txt"
-	$tempHTML = @TempDir & "\MMDWin\Temp" & $page & ".html"
-	; Don't use full path (CSS)
-	$fileList &= "Temp" & $page & ".html "
-
-	$out = FileOpen($tempTXT, 2 + 8 + 256) ;Write New, Create Dir, UTF-8 (No BOM)
-
-	If $out = -1 Then
-		MsgBox(0, $APPTITLE, "Could not create " & $tempTXT)
-		Exit
-	EndIf
-
-	FileWriteLine($out, HTMLHeader())
-	FileWriteLine($out, "")
+	Local $out, $url, $succ, $dia, $line, $lines, $tempTXT, $tempHTML, $tempDIA, $Header, $fileList, $page=0, $image=0, $newFile=0, $start=1
 
 	; Split text in lines on CRLF
 	$lines = StringSplit($inTXT, @CRLF, 1)
+
+	If $TEST Then ConsoleWrite($lines[0] & " lines of text..." & @CRLF)
 
 	For $i = 1 To $lines[0]
 		$line = $lines[$i]
@@ -201,7 +170,7 @@ Func Text2HTML($inTXT)
 		If StringLeft($line, 9) = "[WEBPAGE=" Then
 			$url = StringMid($line, 10, StringLen($line) - 10)
 			ConsoleWrite("Downloading " & $url & "..." & @CRLF)
-			$succ = InetGet($url, @TempDir & "\MMDWin\Temp" & $page + 1 & ".html", 1)
+			$succ = InetGet($url, @TempDir & "\MMD2PDF\Temp" & $page + 1 & ".html", 1)
 			If $succ Then
 				$newFile = 1
 				$page = $page + 1
@@ -212,26 +181,48 @@ Func Text2HTML($inTXT)
 		EndIf
 
 		; Split text on $PAGEBREAK
-		If $line = $PAGEBREAK & @CRLF Or $newFile Then
-			$newFile = 0
-			FileClose($out)
-			MMD($tempTXT, $tempHTML)
+		If $line = $PAGEBREAK Or $newFile Or $start Then
+			If Not $start Then
+				$newFile = 0
+				FileClose($out)
+				MMD($tempTXT, $tempHTML)
+			EndIf
 
+			$start = 0
 			$page = $page + 1
 			ConsoleWrite("Creating HTML " & $page & "..." & @CRLF)
-			$tempTXT = @TempDir & "\MMDWin\Temp" & $page & ".txt"
-			$tempHTML = @TempDir & "\MMDWin\Temp" & $page & ".html"
+			$tempTXT = @TempDir & "\MMD2PDF\Temp" & $page & ".txt"
+			$tempHTML = @TempDir & "\MMD2PDF\Temp" & $page & ".html"
 			; Don't use full path (CSS)
 			$fileList &= "Temp" & $page & ".html "
 
-			$out = FileOpen($tempTXT, 2 + 8 + 256) ;Write New, Create Dir, UTF-8 (No BOM)
+			;$out = FileOpen($tempTXT, 2 + 8 + 256) ;Write New, Create Dir, UTF-8 (No BOM)
+			$out = FileOpen($tempTXT, 2 + 8 + 128) ;Write New, Create Dir, UTF-8 (With BOM)
 
 			If $out = -1 Then
 				MsgBox(0, $APPTITLE, "Could not create " & $tempTXT)
 				Exit
 			EndIf
 
-			FileWriteLine($out, HTMLHeader())
+			; Write the Base Header - This is needed to include Images in the document directory
+			; Path must end with "\"
+			$Header = 'HTML Header: <base href="' & $DIR & "\" & '" />  ' & @CRLF
+			;FileWriteLine($out, 'HTML Header: <base href="' & $DIR & "\" & '" />  ')
+
+			; Write CSS, overruled by CSS in MMD definition
+			$Header &= 'CSS: ' & $CSS & @CRLF
+			;FileWriteLine($out, 'CSS: ' & $CSS)
+
+			; MMD Header in first line?
+			If StringRegExp($line, '^\w*:.*') <> 1 Then
+				If StringRegExp($MMDHEADER, 'Title:') <> 1 Then
+					$Header &= "Title: " & StringUpper(StringLeft($DOCNAME, 1)) & StringMid($DOCNAME, 2) & "  " & @CRLF
+					;FileWriteLine($out, "Title: " & StringUpper(StringLeft($DOCNAME, 1)) & StringMid($DOCNAME, 2) & "  ")
+				EndIf
+				$Header &= $MMDHEADER & @CRLF
+				;FileWriteLine($out, $MMDHEADER)
+			EndIf
+			FileWriteLine($out, $Header)
 			FileWriteLine($out, "")
 
 			ContinueLoop
@@ -305,24 +296,33 @@ Func HTML2PDF($inHTMLs, $outPDF)
 	;MsgBox(0x1010, $APPTITLE, "WK Params:" & @CRLF & @CRLF & $WKPARAMS & @CRLF & @CRLF & $DIR)
 	;Set working directory to HTML File for included files!
 	$tempDir = @WorkingDir
-	FileChangeDir(@TempDir & "\MMDWin")
+	FileChangeDir(@TempDir & "\MMD2PDF")
 
 	ConsoleWrite("Creating PDF..." & @CRLF)
 	; Debug: RunWait(@ComSpec & " /k " & '"' & $HTML2PDFEXE & '" ' & $WKPARAMS, $DIR)
-	ShellExecuteWait($HTML2PDFEXE, $WKPARAMS, @TempDir & "\MMDWin", "Open", @SW_HIDE)
+	ShellExecuteWait($HTML2PDFEXE, $WKPARAMS, @TempDir & "\MMD2PDF", "Open", @SW_HIDE)
 
+	;Set working directory back
 	FileChangeDir($tempDir)
-	FileDelete(@TempDir & "\MMDWin")
+
+	If Not $TEST Then
+		FileDelete(@TempDir & "\MMD2PDF")
+	EndIf
 EndFunc   ;==>HTML2PDF
 
 Func getIni()
 	Local $iniFile, $ini, $line, $section = 0
 
-	$iniFile = $DIR & '\mmdwin.ini'
+	$iniFile = $DIR & '\mmd2pdf.ini'
 
 	; check ini file
-	If Not FileExists($iniFile) = 1 Then $iniFile = @ScriptDir & '\mmdwin.ini'
-	If Not FileExists($iniFile) = 1 Then Return
+	If Not FileExists($iniFile) = 1 Then $iniFile = @ScriptDir & '\mmd2pdf.ini'
+	If Not FileExists($iniFile) = 1 Then
+		ConsoleWrite("No mmd2pdf.ini settings file found!" & @CRLF)
+		Return
+	EndIf
+
+	If $TEST Then ConsoleWrite("Ini file: " & $iniFile & @CRLF)
 
 	; open File
 	$ini = FileOpen($iniFile, 0)
@@ -332,7 +332,7 @@ Func getIni()
 	While 1
 		$line = FileReadLine($ini)
 		If @error = -1 Then ExitLoop
-		If $line = "[MMDWin]" Then
+		If $line = "[MMD2PDF]" Then
 			$section = 1
 			ContinueLoop
 		EndIf
