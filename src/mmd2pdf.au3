@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=multimarkdown, wkhtml2pdf
 #AutoIt3Wrapper_Res_Description=MultiMarkDown to PDF Converter
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.1
+#AutoIt3Wrapper_Res_Fileversion=0.2.0.5
 #AutoIt3Wrapper_Res_FileVersion_AutoIncrement=y
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Au3Check_Parameters=-d
@@ -16,7 +16,7 @@
 Opt("TrayMenuMode", 1) ; Default tray menu items (Script Paused/Exit) will not be shown.
 
 Global Const $APPTITLE = "MMD2PDF"
-Global $TEST = 0
+Global $TEST = 1
 Global $MMDEXE = @ScriptDir & '\mmd\multimarkdown.exe'
 Global $HTML2PDFEXE = @ScriptDir & '\wkhtmltopdf\wkhtmltopdf.exe'
 Global $DIR = @ScriptDir
@@ -24,6 +24,8 @@ Global $DOCNAME = ""
 Global $INFILES = ""
 Global $PDFFILE = ""
 Global $WKPARAMS = "--print-media-type --margin-top 5mm --margin-bottom 5mm --margin-right 5mm --margin-left 5mm --encoding A4 --page-size A4 --orientation Portrait --disable-external-links"
+Global $PDF_TOC = 0
+Global $PDF_OUTLINE = 0
 Global $OPENDOC = 1 ; Default: Open Document
 Global $AUTOOVERWRITE = 1 ; Default: Ask to overwrite
 Global $NEWLINE = 0 ; Default: No AutoNewLine
@@ -60,6 +62,10 @@ If $cmdline[0] > 0 Then
 		$INFILES &= Chr(34) & $DIR & "\" & $DOCNAME & "." & $aPath[2] & Chr(34) & " "
 		If $i = 1 Then
 			$PDFFILE = $DIR & "\" & $DOCNAME & ".pdf"
+		EndIf
+		; More than 1 file --> automatic outline
+		If $i > 1 Then
+			$PDF_OUTLINE = 1
 		EndIf
 	Next
 Else
