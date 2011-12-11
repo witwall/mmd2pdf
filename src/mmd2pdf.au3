@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=multimarkdown, wkhtml2pdf
 #AutoIt3Wrapper_Res_Description=MultiMarkDown to PDF Converter
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.5
+#AutoIt3Wrapper_Res_Fileversion=0.3.0.0
 #AutoIt3Wrapper_Res_FileVersion_AutoIncrement=y
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Au3Check_Parameters=-d
@@ -16,7 +16,7 @@
 Opt("TrayMenuMode", 1) ; Default tray menu items (Script Paused/Exit) will not be shown.
 
 Global Const $APPTITLE = "MMD2PDF"
-Global $TEST = 1
+Global $TEST = 0
 Global $MMDEXE = @ScriptDir & '\mmd\multimarkdown.exe'
 Global $HTML2PDFEXE = @ScriptDir & '\wkhtmltopdf\wkhtmltopdf.exe'
 Global $DIR = @ScriptDir
@@ -29,11 +29,11 @@ Global $PDF_OUTLINE = 0
 Global $OPENDOC = 1 ; Default: Open Document
 Global $AUTOOVERWRITE = 1 ; Default: Ask to overwrite
 Global $NEWLINE = 0 ; Default: No AutoNewLine
-Global $MMDHEADER = "";
-Global $PAGEBREAK = "[PAGEBREAK]";
-Global $OUTPUT = "pdf";
-Global $CSS = "templates/default.css";
-Global $OFFICE = "";
+Global $MMDHEADER = ""
+Global $PAGEBREAK = "[PAGEBREAK]"
+Global $OUTPUT = "pdf"
+Global $CSS = "templates/default.css"
+Global $OFFICE = ""
 
 #include <file.au3>
 #include "..\lib\MMDLib.au3"

@@ -1,28 +1,20 @@
 #include-once
 
 Func Manual()
-	Local $Text, $in, $file = @ScriptDir & "\mmd2pdf.txt"
+	Local $html, $txt = @ScriptDir & "\mmd2pdf.txt", $pdf = @ScriptDir & "\mmd2pdf.pdf"
 
-	If Not FileExists(@ScriptDir & "\mmd2pdf.pdf") Then
+	If Not FileExists($pdf) Then
 		ConsoleWrite("Creating Manual..." & @CRLF)
 
-		$in = FileOpen(StringReplace($file,"""","", 0))
+		$html = ReadFiles($txt)
 
-		If $in = -1 Then
-			ConsoleWriteError("Error opening " & $file)
-			Exit
-		EndIf
+		HTML2PDF($html, $pdf)
 
-		; Read text
-		$Text &= FileRead($in)
-
-		FileClose($in)
-
-		HTML2PDF(Text2HTML($Text), @ScriptDir & "\mmd2pdf.pdf")
-
-		If FileExists(@ScriptDir & "\mmd2pdf.pdf") Then
+		If FileExists($pdf) Then
 			; Open a .pdf file with it's default editor
 			ShellExecute("mmd2pdf.pdf", "", @ScriptDir)
 		EndIf
 	EndIf
+
+	$MMDHEADER = ""
 EndFunc
