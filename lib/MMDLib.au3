@@ -114,6 +114,9 @@ Func Text2HTML($inTXT)
 			If $TEST Then ConsoleWrite("Header: " & @CRLF & $Header & @CRLF)
 		EndIf
 
+		; Don't show Pagebreak command
+		If StringLeft($line, 9) = "[WEBPAGE=" Or $line = $PAGEBREAK Then ContinueLoop
+
 		If $OUTPUT = "pdf" Then
 			$line = Encode($line)
 		EndIf
