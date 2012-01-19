@@ -6,7 +6,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=multimarkdown, wkhtml2pdf
 #AutoIt3Wrapper_Res_Description=MultiMarkDown to PDF Converter
-#AutoIt3Wrapper_Res_Fileversion=0.3.0.0
+#AutoIt3Wrapper_Res_Fileversion=0.4.0.5
 #AutoIt3Wrapper_Res_FileVersion_AutoIncrement=y
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Au3Check_Parameters=-d
@@ -28,7 +28,7 @@ Global $PDF_TOC = 0
 Global $PDF_OUTLINE = 0
 Global $OPENDOC = 1 ; Default: Open Document
 Global $AUTOOVERWRITE = 1 ; Default: Ask to overwrite
-Global $NEWLINE = 0 ; Default: No AutoNewLine
+Global $NEWLINE = 1 ; Default: AutoNewLine
 Global $MMDHEADER = ""
 Global $PAGEBREAK = "[PAGEBREAK]"
 Global $OUTPUT = "pdf"
@@ -41,6 +41,8 @@ Global $OFFICE = ""
 #include "..\lib\Manual.au3"
 
 Dim $path, $fullPath, $i, $aPath, $pages = 0, $tempFiles
+
+ConsoleWrite($APPTITLE & " V" & FileGetVersion(@ScriptDir & "\" & @ScriptName, "FileVersion") & @CRLF)
 
 Setup()
 Manual()
@@ -69,7 +71,7 @@ If $cmdline[0] > 0 Then
 		EndIf
 	Next
 Else
-	ConsoleWrite($APPTITLE & " multimarkdownfile.txt [textfile2.txt ...]")
+	ConsoleWrite("usage: " & @ScriptName & " multimarkdownfile.txt [textfile2.txt ...]")
 	Exit
 EndIf
 
