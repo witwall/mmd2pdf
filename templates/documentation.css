@@ -1,3 +1,12 @@
+HTML BODY {
+	margin-left:20px;
+	margin-right:0px;
+	line-height: 1.2;
+	width: 750px;
+	text-align: justify;
+	font-size: 14px;
+}
+
 BODY ADDRESS {
 	line-height: 1.3;
 	margin: .6em 0;
@@ -9,21 +18,26 @@ BODY BLOCKQUOTE {
 	margin-bottom: .75em;
 }
 
-HTML BODY {
-	margin-left:20px;
-	margin-right:0px;
-	line-height: 1.2;
-	width: 750px;
-	text-align: justify;
-	font-size: 14px;
-}
-
 BODY DIV {
 	margin: 0;
 }
 
-CODE {
+BODY PRE {
+	margin: .75em 0;
+	line-height: 1.0;
+	font-family: monospace;
+}
+
+PRE, CODE{
+  font: 0.8em 'Andale Mono', 'Lucida Console', monospace;
 	white-space: pre-wrap;
+  overflow:auto;
+  max-width: 100%;
+  background-color: #eeeeee;
+}
+
+IMG {
+  max-width: 100%;
 }
 
 DL {
@@ -79,13 +93,6 @@ BODY HR {
 OL {
 	margin: 0 0 0 5%;
 	line-height: 1.2;
-}
-
-BODY PRE {
-  background-color: #eeeeee;
-	margin: .75em 0;
-	line-height: 1.0;
-	font-family: monospace;
 }
 
 BODY TD, BODY TH {

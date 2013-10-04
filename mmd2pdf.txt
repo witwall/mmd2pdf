@@ -1,19 +1,54 @@
 Title:				MMD2PDF Manual  
 Author:				Legobas
 
-#MMD2PDF Manual
+#MMD2PDF
+
+![MMD 2 PDF](mmd2pdf.jpg 'MMD2PDF Icon')
 
 MMD2PDF converts MMD to PDF, adding a few extra's like options to include webpages and support for page-breaks.
 It is a portable utility, it will leave no traces in registry.
 
-##Usage
-MMD2PDF.exe is the commandline executable, but it also contains support files which will be unpacked at first use.
-The first time MMD2PDF is started the manual will also be created.
-Support files and the manual will be placed in the same directory as MMD2PDF.
+##Preferences
+The preferences for MMD2PDF can be defined in the mmd2pdf.ini file in same directory as the mmd2pdf.exe file.
 
-##Pagebreak
+The following preferences can be used:
+
+    [MMD2PDF]
+    OpenDocument = true
+    AutoOverwrite = true
+    AutoNewLines = true ; when true, RETURN becomes a literal newline  
+    PageBreak = [PAGEBREAK]
+    Template = default
+
+    [MultiMarkDown]
+    Keywords:          MultiMarkdown, Markdown, XML, XHTML, XSLT, PDF
+    CSS:               default.css  
+
+    [wkhtmltopdf]
+    --print-media-type
+    --orientation Portrait
+    --margin-top 10mm
+    --margin-bottom 10mm
+    --margin-right 10mm
+    --margin-left 10mm
+    --encoding A4
+    --page-size A4
+    --disable-external-links
+    --redirect-delay 0
+    --disable-javascript
+
+#Definitions
+The definitions for a document, how a document is processed, can be defined in the [pagename].def file in the same directory as the document.
+For example, if the Markdon document is document.txt the definitions file will be the document.def file.
+
+The following definitions can be used:
+ * All the MultiMarkDown definitions
+
+##Pagebreaks
 To start Text at the beginning of a page a pagebreak kan be used.
 The pagebreak identifier is : \[PAGEBREAK\] on a seperate line.
+
+It is also possible to place every start of a markdown top level at a different page, by adding `PageBreakAtTopLevel: 1` to the [pagename].def file.
 
 ##Special characters
 Special characters for pronunciation (diacritics) will be correctly converted, whether the source file is in ANSI, UTF-8 or UTF-8 without BOM encoding. Examples of these characters are:
@@ -21,12 +56,9 @@ Special characters for pronunciation (diacritics) will be correctly converted, w
 
 [MultiMarkdown Readme]: http://fletcher.freeshell.org/wiki/MultiMarkdown 'MultiMarkdown Readme'
 
-##Markdown
+#Markdown
 Some simple examples of Markdown:
 *Italic*, **Bold**, _italic_, __bold__, ***Italic & Bold (3 stars)***.
-
-[PAGEBREAK]
-#Configuration
 
 ##Settings in mmd2pdf.ini
 
@@ -64,26 +96,21 @@ The pdf settings in mmd2pdf.ini are directly passed to wkhtmltopdf (without the 
 --redirect-delay 0
 --disable-javascript
 
-[PAGEBREAK]
 ##Text Editor support
 MMD2PDF can easily be used in a text editor. For example in Notepad++, create this Execute command:
 
     `$(NPP_DIRECTORY)\MMD2PDF\MMD2PDF.exe "$(FULL_CURRENT_PATH)"`
 
-#Table 1 - Tools
+[PAGEBREAK]
+Table 1 - Tools
 
 Utility                 | Language      | Document | Extension
 ----------------------- | :-----------: | :------: | -:
 MultiMarkDown           | C++           | html     | html
 wkhtmltopdf             | C++           | pdf      | pdf
 
-#Links
-[MultiMarkDown](http://fletcher.github.com/peg-multimarkdown)
-[MarkDown](http://daringfireball.net/projects/markdown)
-[wkhtmltopdf](http://madalgo.au.dk/~jakobt/wkhtmltoxdoc/wkhtmltopdf-0.9.9-doc.html)
-[Markdown syntax highlighting module for Notepad++](https://github.com/thomsmits/markdown_npp)
 
-#Logo
-![MMD 2 PDF](mmd2pdf.jpg 'MMD2PDF Icon')
+[MultiMarkDown](http://fletcher.github.com/peg-multimarkdown)
+[wkhtmltopdf](http://madalgo.au.dk/~jakobt/wkhtmltoxdoc/wkhtmltopdf-0.9.9-doc.html)
 
 [WEBPAGE=http://code.google.com/p/mmd2pdf]
