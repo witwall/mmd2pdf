@@ -2,7 +2,7 @@
 #include "Encode.au3"
 
 Func ReadFiles($files)
-	Local $Text, $line, $i, $in, $fileList, $getHeader = 1
+	Local $Text, $line, $i, $in, $pos, $fileList, $firstTopLevel, $getHeader = 1
 
 	If $TEST Then ConsoleWrite("Files: " & $files & @CRLF)
 
@@ -16,6 +16,7 @@ Func ReadFiles($files)
 			Exit
 		EndIf
 
+		$firstTopLevel = 0
 		; Read text
 		While 1
 			$line = FileReadLine($in)
@@ -25,13 +26,34 @@ Func ReadFiles($files)
 			If $getHeader Then
 				$getHeader = 0
 
-				While StringRegExp($line, '^\w*:.*')
+				While StringRegExp($line, '^[\w ]*:.*')
 					$MMDHEADER &= $line & @CRLF
 					$line = FileReadLine($in)
 					If @error = -1 Then ExitLoop
 				WEnd
 
 				If $TEST Then ConsoleWrite("MMD Header:" & @CRLF & $MMDHEADER & @CRLF)
+			EndIf
+
+			; detect pagebreaks
+			If $PAGEBREAKATTOPLEVEL Then
+				If StringRegExp($line, '^==*$') Then
+					If Not $firstTopLevel Then
+						$firstTopLevel = 1
+					Else
+						$pos = StringInStr($Text, @CRLF, 0, -2)
+						If $pos > 0 Then
+							$Text = StringLeft($Text, $pos-1) & @CRLF & $PAGEBREAK & StringMid($Text, $pos)
+						EndIf
+					EndIf
+				EndIf
+				If StringRegExp($line, "^#[^#]") Then
+					If Not $firstTopLevel Then
+						$firstTopLevel = 1
+					Else
+						$Text &= $PAGEBREAK & @CRLF
+					EndIf
+				EndIf
 			EndIf
 
 			$Text &= $line & @CRLF
@@ -50,7 +72,7 @@ Func ReadFiles($files)
 EndFunc
 
 Func Text2HTML($inTXT)
-	Local $out, $url, $succ, $dia, $line, $lines, $tempTXT, $tempHTML, $tempDIA, $Header, $fileList, $page=0, $image=0, $newFile=0, $start=1
+	Local $out, $url, $succ, $dia, $line, $lines, $tempTXT, $tempHTML, $tempDIA, $Header, $fileList, $page=0, $image=0, $newFile=0, $start=1, $chars
 
 	; Split text in lines on CRLF
 	$lines = StringSplit($inTXT, @CRLF, 1)
@@ -121,7 +143,12 @@ Func Text2HTML($inTXT)
 			$line = Encode($line)
 		EndIf
 
-		If $NEWLINE Then $line &= "  " ; break - end line with 2 spaces
+		If $NEWLINE Then
+			$chars = StringLeft($line, 1) + StringRight($line, 1)
+			If Not ($chars="==" Or $chars="--") Then
+				$line &= "  " ; break - end line with 2 spaces
+			EndIf
+		EndIf
 		FileWriteLine($out, $line)
 
 	Next
@@ -186,7 +213,7 @@ Func HTML2PDF($inHTMLs, $outPDF)
 	$WKPARAMS &= " " & $inHTMLs & " "
 	$WKPARAMS &= '"' & $outPDF & '"'
 
-	;MsgBox(0x1010, $APPTITLE, "WK Params:" & @CRLF & @CRLF & $WKPARAMS & @CRLF & @CRLF & $DIR)
+	If $TEST Then ConsoleWrite("WK Params:" & @CRLF & $WKPARAMS & @CRLF & $DIR & @CRLF)
 	;Set working directory to HTML File for included files!
 	$tempDir = @WorkingDir
 	FileChangeDir(@TempDir & "\MMD2PDF")
@@ -241,7 +268,7 @@ Func getIni()
 		If $section = 1 Then
 			If StringRegExp($line, '(O|o)pen(D|d)ocument') = 1 And StringRegExp($line, '^[^;]*true') <> 1 Then $OPENDOC = 0
 			If StringRegExp($line, '(A|a)uto(O|o)verwrite') = 1 And StringRegExp($line, '^[^;]*true') = 1 Then $AUTOOVERWRITE = 0
-			If StringRegExp($line, '(A|a)uto(N|n)ew(L|l)ines') = 1 And StringRegExp($line, '^[^;]*true') = 1 Then $NEWLINE = 1
+			If StringRegExp($line, '(A|a)uto(N|n)ew(L|l)ines') = 1 And StringRegExp($line, '^[^;]*true') <> 1 Then $NEWLINE = 0
 			If StringRegExp($line, '(P|p)age(B|b)reak') = 1 Then
 				$PAGEBREAK = StringRegExpReplace($line, ".*=[ ]*", "")
 			EndIf
@@ -266,122 +293,39 @@ Func getIni()
 	FileClose($ini)
 EndFunc   ;==>getIni
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; DEPRICATED ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Func getDef()
+	Local $defFile, $def, $line, $section = 0
 
-Func TXT2HTML($inTXT)
-	Local $in, $out, $dia, $line, $Header, $tempTXT, $tempHTML, $tempDIA, $page = 0, $image = 0
+	$defFile = $DIR & "\" & $DOCNAME & ".def"
+
+	; check def file
+	If Not FileExists($defFile) = 1 Then
+		ConsoleWrite("No " & $DOCNAME & ".def definitions file found" & @CRLF)
+		Return
+	EndIf
+
+	If $TEST Then ConsoleWrite("Def file: " & $defFile & @CRLF)
+
 	; open File
-	$in = FileOpen($inTXT, 0)
-
-	If $in = -1 Then
-		MsgBox(0, $APPTITLE, "Error opening " & $inTXT)
-		Exit
-	EndIf
-
-	$tempTXT = @TempDir & "\MMD2PDF\Temp" & $page & ".txt"
-	$tempHTML = @TempDir & "\MMD2PDF\Temp" & $page & ".html"
-
-	$out = FileOpen($tempTXT, 2 + 8 + 256) ;Write New, Create Dir, UTF-8 (No BOM)
-
-	If $out = -1 Then
-		MsgBox(0, $APPTITLE, "Error opening " & $tempTXT)
-		Exit
-	EndIf
-
-	; Read first line
-	$line = FileReadLine($in)
-	If @error = -1 Then
-		MsgBox(0, $APPTITLE, "Error reading " & $inTXT)
-		Exit
-	EndIf
-
-	; Write the Base Header - This is needed to include Images in the document directory
-	; Path must end with "\"
-	$Header = 'HTML Header: <base href="' & $DIR & "\" & '" />  ' & @CRLF
-	;FileWriteLine($out, 'HTML Header: <base href="' & $DIR & "\" & '" />  ')
-
-	; Write CSS, overruled by CSS in MMD definition
-	$Header &= 'CSS: ' & $CSS & @CRLF
-	;FileWriteLine($out, 'CSS: ' & $CSS)
-
-	; MMD Header in file?
-	If StringRegExp($line, '\w*:.*') <> 1 Then
-		If StringRegExp($MMDHEADER, 'Title:') <> 1 Then
-			$Header &= "Title: " & StringUpper(StringLeft($DOCNAME, 1)) & StringMid($DOCNAME, 2) & "  " & @CRLF
-			;FileWriteLine($out, "Title: " & StringUpper(StringLeft($DOCNAME, 1)) & StringMid($DOCNAME, 2) & "  ")
-		EndIf
-		$Header &= $MMDHEADER & @CRLF
-		;FileWriteLine($out, $MMDHEADER)
-	EndIf
-
-	FileWrite($out, $Header)
-	FileWriteLine($out, $line & "  ")
+	$def = FileOpen($defFile, 0)
+	If $def = -1 Then Return
 
 	; Read in lines of text until the EOF is reached
 	While 1
-		$line = FileReadLine($in)
+		$line = FileReadLine($def)
 		If @error = -1 Then ExitLoop
 
-		If StringLen($PAGEBREAK) > 0 And StringLeft($line, StringLen($PAGEBREAK)) = $PAGEBREAK Then
-			$page += 1
-			If $page > 0 Then
-				FileClose($out)
-
-				MMD($tempTXT, $tempHTML)
-
-				$tempTXT = @TempDir & "\MMD2PDF\Temp" & $page & ".txt"
-				$tempHTML = @TempDir & "\MMD2PDF\Temp" & $page & ".html"
-
-				$out = FileOpen($tempTXT, 2 + 8 + 256) ;Write New, Create Dir, UTF-8 (No BOM)
-				If $out = -1 Then
-					MsgBox(0, $APPTITLE, "Error opening " & $tempTXT)
-					Exit
-				EndIf
-				FileWrite($out, $Header)
-			EndIf
-			; Next line, don't print this
-			ContinueLoop
+		If StringRegExp($line, '(P|p)age(B|b)reak(A|a)t(T|t)op(L|l)evel') = 1 Then
+			$PAGEBREAKATTOPLEVEL = StringRegExpReplace($line, ".*:[ ]*", "")
+			If $TEST Then ConsoleWrite("PageBreakAtTopLevel:" & $PAGEBREAKATTOPLEVEL & @CRLF)
 		EndIf
-
-		If $line = "[DITAA]" Then
-			$image += 1
-			$tempDIA = @TempDir & "\MMD2PDF\image" & $image
-
-			$dia = FileOpen($tempDIA & ".txt", 2 + 8 + 256) ;Write New, Create Dir, UTF-8 (No BOM)
-			If $dia = -1 Then
-				MsgBox(0, $APPTITLE, "Error opening " & $tempDIA & ".txt")
-				Exit
-			EndIf
-
-			While 1
-				$line = FileReadLine($in)
-				If @error = -1 Then ExitLoop
-				If $line = "[!ditaa]" Then ExitLoop
-				FileWriteLine($dia, $line)
-			WEnd
-
-			FileClose($dia)
-
-			DITAA($tempDIA & ".txt", $tempDIA & ".png")
-
-			FileWriteLine($out, "![Image" & $image & "](file:///" & $tempDIA & ".png)")
-
-			; Next line, don't print closing tag
-			ContinueLoop
+		If StringRegExp($line, '(T|t)itle') = 1 Then
+			;$TITLE = StringRegExpReplace($line, ".*=[^\w]*", "")
 		EndIf
-
-		If $OUTPUT = "pdf" Then
-			$line = Encode($line)
+		If StringRegExp($line, '(C|c)opyright') = 1 Then
+			;$TITLE = StringRegExpReplace($line, ".*=[^\w]*", "")
 		EndIf
-		If $NEWLINE Then $line &= "  " ; break - end line with 2 spaces
-		FileWriteLine($out, $line)
 	WEnd
 
-	FileClose($in)
-	FileClose($out)
-
-	MMD($tempTXT, $tempHTML)
-
-	Return $page
-EndFunc   ;==>TXT2HTML
-
+	FileClose($def)
+EndFunc   ;==>getdef
