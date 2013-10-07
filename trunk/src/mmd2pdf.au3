@@ -7,10 +7,11 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=multimarkdown, wkhtml2pdf
 #AutoIt3Wrapper_Res_Description=MultiMarkDown to PDF Converter
-#AutoIt3Wrapper_Res_Fileversion=0.4.0.6
+#AutoIt3Wrapper_Res_Fileversion=0.4.0.13
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_AU3Check_Parameters=-d
+#AutoIt3Wrapper_Run_After=copy "%out%" "c:\Users\Bas\Google Drive\Tools\MMD2PDF"
 #AutoIt3Wrapper_Run_Tidy=y
 #endregion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
@@ -38,6 +39,7 @@ Global $PAGEBREAKATTOPLEVEL = 0 ; Default: No pagebreak at top level
 Global $OUTPUT = "pdf"
 Global $CSS = "templates/default.css"
 Global $OFFICE = ""
+Global $FOOTER = ""
 
 #include <file.au3>
 #include "..\lib\MMDLib.au3"
@@ -79,12 +81,13 @@ Else
 	Exit
 EndIf
 
-If $TEST Then ConsoleWrite("File(s): " & $INFILES)
-
 getIni()
 getDef()
 
-If $TEST Then ConsoleWrite("Output to: " & $OUTPUT & @CRLF)
+If $TEST Then
+	ConsoleWrite("File(s): " & $INFILES)
+	ConsoleWrite("Output to: " & $OUTPUT & @CRLF)
+EndIf
 
 $tempFiles = ReadFiles($INFILES)
 
