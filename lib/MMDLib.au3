@@ -233,12 +233,10 @@ EndFunc   ;==>HTML2PDF
 Func getIni()
 	Local $iniFile, $ini, $line, $section = 0
 
-	$iniFile = $DIR & '\mmd2pdf.ini'
-
 	; check ini file
-	If Not FileExists($iniFile) = 1 Then $iniFile = @ScriptDir & '\mmd2pdf.ini'
+	$iniFile = @ScriptDir & '\mmd2pdf.ini'
 	If Not FileExists($iniFile) = 1 Then
-		ConsoleWrite("No mmd2pdf.ini settings file found!" & @CRLF)
+		ConsoleWrite("No mmd2pdf.ini preferences file found" & @CRLF)
 		Return
 	EndIf
 
@@ -266,6 +264,7 @@ Func getIni()
 			ContinueLoop
 		EndIf
 		If $section = 1 Then
+			If StringRegExp($line, 'Test') = 1 And StringRegExp($line, '^[^;]*true') <> 0 Then $TEST = 1
 			If StringRegExp($line, '(O|o)pen(D|d)ocument') = 1 And StringRegExp($line, '^[^;]*true') <> 1 Then $OPENDOC = 0
 			If StringRegExp($line, '(A|a)uto(O|o)verwrite') = 1 And StringRegExp($line, '^[^;]*true') = 1 Then $AUTOOVERWRITE = 0
 			If StringRegExp($line, '(A|a)uto(N|n)ew(L|l)ines') = 1 And StringRegExp($line, '^[^;]*true') <> 1 Then $NEWLINE = 0
@@ -275,15 +274,12 @@ Func getIni()
 			If StringRegExp($line, '(O|o)utput') = 1 Then
 				$OUTPUT = StringLower(StringRegExpReplace($line, ".*=[^\w]*(f|)", ""))
 			EndIf
-			If StringRegExp($line, '(T|t)emplate') = 1 Then
-				$CSS = "file:///" & @ScriptDir & "\templates\" & StringRegExpReplace($line, ".*=[^\w]*", "") & ".css"
-			EndIf
 			If StringRegExp($line, '(O|o)ffice(E|e)xe') = 1 Then
 				$OFFICE = StringRegExpReplace($line, ".*=[^\w]*", "")
 			EndIf
 		EndIf
 		If $section = 2 Then
-			$MMDHEADER &= $line & "  " & @CRLF
+			;$MMDHEADER &= $line & "  " & @CRLF
 		EndIf
 		If $section = 3 Then
 			$WKPARAMS &= $line & " "
@@ -294,7 +290,7 @@ Func getIni()
 EndFunc   ;==>getIni
 
 Func getDef()
-	Local $defFile, $def, $line, $section = 0
+	Local $defFile, $def, $line, $style, $section = 0
 
 	$defFile = $DIR & "\" & $DOCNAME & ".def"
 
@@ -315,14 +311,26 @@ Func getDef()
 		$line = FileReadLine($def)
 		If @error = -1 Then ExitLoop
 
-		If StringRegExp($line, '(P|p)age(B|b)reak(A|a)t(T|t)op(L|l)evel') = 1 Then
-			$PAGEBREAKATTOPLEVEL = StringRegExpReplace($line, ".*:[ ]*", "")
+		If StringInStr($line, "style") > 0 Then
+			If StringInStr($line, '.css') = 0 Then
+				$style = StringStripWS(StringMid($line, StringInStr($line, ":")+1),3)
+				$CSS = "file:///" & @ScriptDir & "\styles\" & $style & ".css"
+			Else
+				$CSS = StringRegExpReplace($line, ".*:[ ]*", "")
+			EndIf
+			If $TEST Then ConsoleWrite("CSS:" & $CSS & @CRLF)
+		EndIf
+		If StringInStr($line, "pagebreakattoplevel") > 0 Then
+			$PAGEBREAKATTOPLEVEL = 1
+			If StringInStr($line, "n", 0, 1, 20) <> 0 Then
+				$PAGEBREAKATTOPLEVEL = 0
+			EndIf
 			If $TEST Then ConsoleWrite("PageBreakAtTopLevel:" & $PAGEBREAKATTOPLEVEL & @CRLF)
 		EndIf
-		If StringRegExp($line, '(T|t)itle') = 1 Then
+		If StringInStr($line, "title") > 0 Then
 			;$TITLE = StringRegExpReplace($line, ".*=[^\w]*", "")
 		EndIf
-		If StringRegExp($line, '(C|c)opyright') = 1 Then
+		If StringInStr($line, "copyright") > 0 Then
 			;$TITLE = StringRegExpReplace($line, ".*=[^\w]*", "")
 		EndIf
 	WEnd
