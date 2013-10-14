@@ -1,0 +1,10 @@
+Title: Book Demo
+Style: book
+Keywords: Demo   
+Copyright: 2013 Legobas
+PageBreakAtTopLevel: y
+Header: n
+Footer: y
+Include: demo.txt
+Include: demo-documentation.txt
+Include: demo-presentation.txt

@@ -1,14 +1,10 @@
-#MMD2PDF Manual
-
-![MMD 2 PDF](mmd2pdf.jpg 'MMD2PDF Icon')
+#MMD2PDF Manual ![MMD2PDF][]
 
 MMD2PDF converts MMD to PDF, adding a few extra's like options to include webpages and support for page-breaks.
 It is a portable utility, it will leave no traces in registry.
 
 ##Usage
-MMD2PDF.exe is the commandline executable, but it also contains support files which will be unpacked at first use.
-The first time MMD2PDF is started the manual will also be created.
-Support files and the manual will be placed in the same directory as MMD2PDF.
+MMD2PDF.exe is a commandline executable.
 
 ##Preferences
 The preferences for MMD2PDF can be defined in the mmd2pdf.ini file in same directory as the mmd2pdf.exe file.
@@ -37,30 +33,16 @@ The following preferences can be used:
 
 #Definitions
 The definitions for a document, how a document is processed, can be defined in the [pagename].def file in the same directory as the document.
-For example, if the Markdon document is document.txt the definitions file will be the document.def file.
+For example, if the Markdown document is document.txt the definitions file will be the document.def file.
 
 The following definitions can be used:
- * All the MultiMarkDown definitions
 
-##Pagebreaks
-To start Text at the beginning of a page a pagebreak kan be used.
-The pagebreak identifier is : \[PAGEBREAK\] on a seperate line.
-
-It is also possible to place every start of a markdown top level at a different page, by adding `PageBreakAtTopLevel: 1` to the [pagename].def file.
-
-##Special characters
-Special characters for pronunciation (diacritics) will be correctly converted, whether the source file is in ANSI, UTF-8 or UTF-8 without BOM encoding. Examples of these characters are:
-> á, ä, à, â, æ, ç, é, ë, è, ê, í, ï, ì, î, ó, ö, ò, ô, š, ú, ü, ù, û
-
-[MultiMarkdown Readme]: http://fletcher.freeshell.org/wiki/MultiMarkdown 'MultiMarkdown Readme'
-
-#Markdown
-Some simple examples of Markdown:
-*Italic*, **Bold**, _italic_, __bold__, ***Italic & Bold (3 stars)***.
-
-The main mmd2pdf.ini file resides in the same directory as mmd2pdf.exe.
-Different versions of mmd2pdf.ini can also be used.
-A mmd2pdf.ini in the same directory as the text document overrides the main ini file.
+ * PageBreakAtTopLevel
+ * Style
+ * MultiMarkDown definitions.  
+   The MultiMarkDown executable will handle these definitions as if they are on top of the page.
+ * MultiMarkDown Image/Link references, after an empty line.  
+   The MultiMarkDown executable will handle these references as if they are in the document. This makes it possible to seperate the references from the document.
 
 ###MMD2PDF Preferences
 The Preferences for mmd2pdf can be changed by editing in the mmd2pdf.ini file.
@@ -97,22 +79,76 @@ The pdf settings in mmd2pdf.ini are directly passed to wkhtmltopdf (without the 
 --redirect-delay 0
 --disable-javascript
 
-##Text Editor support
+Styles
+======
+MMD2PDF comes with the following styles:
+
+* default - basic black and white pages
+* documentation - blue headers and tables, header and footer support
+* presentation - for fullscreen pdf slides  
+For viewing PDF presentations I recommend [SumatraPDF](http://blog.kowalczyk.info/software/sumatrapdf/free-pdf-reader.html), the key combination Ctrl-L puts the display in presentation mode.
+
+###Creating your own styles
+A mmd2pdf style consists of a .css and a .sty file.
+For the \<stylename\>.css any css styling can be used, but there are some considerations: 
+
+* Scrollbars  
+  Sometimes scrollbars will appear, for example if an image is larger than the page size. To prevent this the image or text must be made smaller. No scrollbars will be shown if the following css style is used (the *default* style has this behavior):  
+  `::-webkit-scrollbar { display: none; }`
+* The best way to handle large images and text blocks is to use `max-width: 100%;`
+
+The \<stylename\>.sty has the following options:
+
+Key                 | Value          | Description
+--------------------|----------------|------------
+--orientation       | Portrait / Landscape
+                    |
+--header-center     |[title]
+--header-font-name  | "Verdana, Geneva, sans-serif"
+--header-font-size  | 8
+--header-line       |
+                    |
+--footer-line       |
+--footer-right      | [page]/[topage]
+--footer-font-name  | "Verdana, Geneva, sans-serif"
+--footer-font-size  | 8
+                    |
+--footer-center     | footer.html 
+
+MMD2PDF Document Specialties
+============================
+
+##Pagebreaks
+To start Text at the beginning of a page a pagebreak kan be used.
+The pagebreak identifier is : \[PAGEBREAK\] on a seperate line.
+
+It is also possible to place every start of a markdown top level at a different page, by adding `PageBreakAtTopLevel: 1` to the [pagename].def file.
+
+##Special characters
+Special characters for pronunciation (diacritics) will be correctly converted, whether the source file is in ANSI, UTF-8 or UTF-8 without BOM encoding. Examples of these characters are:
+> á, ä, à, â, æ, ç, é, ë, è, ê, í, ï, ì, î, ó, ö, ò, ô, š, ú, ü, ù, û
+
+
+
+Text Editor support
+===================
 MMD2PDF can easily be used in a text editor. For example in Notepad++, create this Execute command:
 
-    `$(NPP_DIRECTORY)\MMD2PDF\MMD2PDF.exe "$(FULL_CURRENT_PATH)"`
+    $(NPP_DIRECTORY)\MMD2PDF\MMD2PDF.exe "$(FULL_CURRENT_PATH)"
 
-#Table 1 - Tools
-
-Utility                 | Language      | Document | Extension
------------------------ | :-----------: | :------: | -:
-MultiMarkDown           | C++           | html     | html
-wkhtmltopdf             | C++           | pdf      | pdf
-
-#Links
+Links
+-----
 [MultiMarkDown](http://fletcher.github.com/peg-multimarkdown)
+[MultiMarkdown Readme]: http://fletcher.freeshell.org/wiki/MultiMarkdown 'MultiMarkdown Readme'
 [MarkDown](http://daringfireball.net/projects/markdown)
 [wkhtmltopdf](http://madalgo.au.dk/~jakobt/wkhtmltoxdoc/wkhtmltopdf-0.9.9-doc.html)
 [Markdown syntax highlighting module for Notepad++](https://github.com/thomsmits/markdown_npp)
 
+Webpage Example
+---------------
+The next page show an example of a webpage included in the document. It can be a local HTML page or a Website on the Internet.
+This can be done by using the following command on a seperate textline:
+
+    [WEBPAGE=http://code.google.com/p/mmd2pdf]
+    
 [WEBPAGE=http://code.google.com/p/mmd2pdf]
