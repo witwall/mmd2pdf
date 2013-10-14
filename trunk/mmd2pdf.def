@@ -1,4 +1,8 @@
 Title:	MMD2PDF Manual  
 Author:	Legobas
-PageBreakAtTopLevel: 1
 Style: documentation
+PageBreakAtTopLevel: Yes
+Header: Yes
+Footer: Yes
+
+[MMD2PDF]: mmd2pdf.jpg "MMD2PDF" width=30px

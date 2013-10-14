@@ -1,9 +1,13 @@
-HTML {
+::-webkit-scrollbar { 
+    display: none; 
+}
+
+html {
   margin: 0; 
   padding: 0;
 }
 
-HTML BODY {
+html body {
   margin-left:20px;
   margin-right:0px;
   line-height: 1.2;
@@ -13,107 +17,136 @@ HTML BODY {
   font-size: 14px;
 }
 
-BODY ADDRESS {
+body address {
   line-height: 1.3;
   margin: .6em 0;
 }
 
-BODY BLOCKQUOTE {
+body blockquote {
   margin-top: .75em;
   line-height: 1.5;
   margin-bottom: .75em;
 }
 
-BODY DIV {
+body div {
   margin: 0;
 }
 
-BODY PRE {
+body pre {
   margin: .75em 0;
   line-height: 1.0;
   font-family: monospace;
+  background-color: #eeeeee;
+  border: 1px solid #ccc;
 }
 
-PRE, CODE{
+pre, code{
   font: 0.8em 'Andale Mono', 'Lucida Console', monospace;
   white-space: pre-wrap;
   overflow:auto;
   max-width: 100%;
-  background-color: #eeeeee;
 }
 
-IMG {
+img {
   max-width: 100%;
 }
 
-DL {
+dl {
   margin: .8em 0;
   line-height: 1.2;
 }
 
-BODY FORM {
+body form {
   margin: .6em 0;
 }
 
-H1, H2, H4, H5, H6 {
+h1, h2, h4, h5, h6 {
   color: #005599;
 }
 
-H1{
+h1{
     border-bottom: 1px solid black;
 }
 
-BODY H1, BODY H2, BODY H3, BODY H4, BODY H5, BODY H6 {
+body h1, body h2, body h3, body h4, body h5, body h6 {
   line-height: 1.3;
   margin-left: 0;
 }
 
-BODY H1{
+body h1{
   margin: .8em 0 0 -20px;
 }
 
-BODY H2 {
+body h2 {
   margin: .8em 0 0 -10px;
 }
 
-BODY H3, BODY H4 {
+body h3, body h4 {
   margin: .8em 0 0 -8px;
   font-size: 1em;
 }
 
-BODY H5 {
+body h5 {
   margin: .8em 0 0 -6px;
 }
 
-BODY H6 {
+body h6 {
   margin: .8em 0 0 -4px;
 }
 
-BODY HR {
+body hr {
   margin: .6em;
   border-width: 0 0 1px 0;
   border-style: solid;
   border-color: #cecece;
 }
 
-OL {
+ol {
   margin: 0 0 0 5%;
   line-height: 1.2;
 }
 
-BODY TD, BODY TH {
-  line-height: 1.2;
-}
-
-UL, BODY DIR, BODY MENU {
+ul, body dir, body menu {
   margin: 0 0 0 5%;
   line-height: 1.2;
 }
 
-BLOCKQUOTE{
+blockquote{
   color: #222;
-  background: #eee;
-  border: 1px solid #ccc;
   padding: 0.4em 0.4em;
   width: 85%;
+}
+
+table {
+  padding: 0;
+  margin: 0;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: 1.2em;
+  line-height: 1.2;
+  color: #000;
+  background: #bcd0e4;
+  border: 1px solid #005599;
+  border-spacing: 0px;
+}
+
+caption {
+ font-weight: bold;
+ font-size: 1.5em;
+}
+
+thead {
+  margin: 0;
+  padding: 0;
+  background-color: #005599;
+}
+
+th {
+  color: #fff;
+  padding: 10px;
+  background-color: #005599;
+}
+
+td {
+  padding: 12px;
+  background-color: #bcd0e4;
 }

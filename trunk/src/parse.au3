@@ -1,5 +1,5 @@
 #include-once
-#include "Encode.au3"
+#include "encode.au3"
 
 Func ReadFiles($files)
 	Local $Text, $line, $i, $in, $pos, $fileList, $firstTopLevel, $getHeader = 1
@@ -92,7 +92,7 @@ Func Text2HTML($inTXT)
 				$page = $page + 1
 				$fileList &= "Temp" & $page & ".html "
 			Else
-				$line="<" & $url & ">" & @CRLF
+				$line="    [" & $url & "]" & @CRLF
 			EndIf
 		EndIf
 
@@ -229,111 +229,3 @@ Func HTML2PDF($inHTMLs, $outPDF)
 		FileDelete(@TempDir & "\MMD2PDF")
 	EndIf
 EndFunc   ;==>HTML2PDF
-
-Func getIni()
-	Local $iniFile, $ini, $line, $section = 0
-
-	; check ini file
-	$iniFile = @ScriptDir & '\mmd2pdf.ini'
-	If Not FileExists($iniFile) = 1 Then
-		ConsoleWrite("No mmd2pdf.ini preferences file found" & @CRLF)
-		Return
-	EndIf
-
-	If $TEST Then ConsoleWrite("Ini file: " & $iniFile & @CRLF)
-
-	; open File
-	$ini = FileOpen($iniFile, 0)
-	If $ini = -1 Then Return
-
-	; Read in lines of text until the EOF is reached
-	While 1
-		$line = FileReadLine($ini)
-		If @error = -1 Then ExitLoop
-		If $line = "[MMD2PDF]" Then
-			$section = 1
-			ContinueLoop
-		EndIf
-		If $line = "[MultiMarkDown]" Then
-			$section = 2
-			ContinueLoop
-		EndIf
-		If $line = "[wkhtmltopdf]" Then
-			$section = 3
-			$WKPARAMS = ""
-			ContinueLoop
-		EndIf
-		If $section = 1 Then
-			If StringRegExp($line, 'Test') = 1 And StringRegExp($line, '^[^;]*true') <> 0 Then $TEST = 1
-			If StringRegExp($line, '(O|o)pen(D|d)ocument') = 1 And StringRegExp($line, '^[^;]*true') <> 1 Then $OPENDOC = 0
-			If StringRegExp($line, '(A|a)uto(O|o)verwrite') = 1 And StringRegExp($line, '^[^;]*true') = 1 Then $AUTOOVERWRITE = 0
-			If StringRegExp($line, '(A|a)uto(N|n)ew(L|l)ines') = 1 And StringRegExp($line, '^[^;]*true') <> 1 Then $NEWLINE = 0
-			If StringRegExp($line, '(P|p)age(B|b)reak') = 1 Then
-				$PAGEBREAK = StringRegExpReplace($line, ".*=[ ]*", "")
-			EndIf
-			If StringRegExp($line, '(O|o)utput') = 1 Then
-				$OUTPUT = StringLower(StringRegExpReplace($line, ".*=[^\w]*(f|)", ""))
-			EndIf
-			If StringRegExp($line, '(O|o)ffice(E|e)xe') = 1 Then
-				$OFFICE = StringRegExpReplace($line, ".*=[^\w]*", "")
-			EndIf
-		EndIf
-		If $section = 2 Then
-			;$MMDHEADER &= $line & "  " & @CRLF
-		EndIf
-		If $section = 3 Then
-			$WKPARAMS &= $line & " "
-		EndIf
-	WEnd
-
-	FileClose($ini)
-EndFunc   ;==>getIni
-
-Func getDef()
-	Local $defFile, $def, $line, $style, $section = 0
-
-	$defFile = $DIR & "\" & $DOCNAME & ".def"
-
-	; check def file
-	If Not FileExists($defFile) = 1 Then
-		ConsoleWrite("No " & $DOCNAME & ".def definitions file found" & @CRLF)
-		Return
-	EndIf
-
-	If $TEST Then ConsoleWrite("Def file: " & $defFile & @CRLF)
-
-	; open File
-	$def = FileOpen($defFile, 0)
-	If $def = -1 Then Return
-
-	; Read in lines of text until the EOF is reached
-	While 1
-		$line = FileReadLine($def)
-		If @error = -1 Then ExitLoop
-
-		If StringInStr($line, "style") > 0 Then
-			If StringInStr($line, '.css') = 0 Then
-				$style = StringStripWS(StringMid($line, StringInStr($line, ":")+1),3)
-				$CSS = "file:///" & @ScriptDir & "\styles\" & $style & ".css"
-			Else
-				$CSS = StringRegExpReplace($line, ".*:[ ]*", "")
-			EndIf
-			If $TEST Then ConsoleWrite("CSS:" & $CSS & @CRLF)
-		EndIf
-		If StringInStr($line, "pagebreakattoplevel") > 0 Then
-			$PAGEBREAKATTOPLEVEL = 1
-			If StringInStr($line, "n", 0, 1, 20) <> 0 Then
-				$PAGEBREAKATTOPLEVEL = 0
-			EndIf
-			If $TEST Then ConsoleWrite("PageBreakAtTopLevel:" & $PAGEBREAKATTOPLEVEL & @CRLF)
-		EndIf
-		If StringInStr($line, "title") > 0 Then
-			;$TITLE = StringRegExpReplace($line, ".*=[^\w]*", "")
-		EndIf
-		If StringInStr($line, "copyright") > 0 Then
-			;$TITLE = StringRegExpReplace($line, ".*=[^\w]*", "")
-		EndIf
-	WEnd
-
-	FileClose($def)
-EndFunc   ;==>getdef
