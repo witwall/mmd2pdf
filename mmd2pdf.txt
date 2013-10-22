@@ -1,87 +1,57 @@
 #MMD2PDF Manual ![MMD2PDF][]
 
-MMD2PDF converts MMD to PDF, adding a few extra's like options to include webpages and support for page-breaks.
+MMD2PDF can be used to convert (Multi)MarkDown documents to PDF documents.
 It is a portable utility, it will leave no traces in registry.
 
 ##Usage
 MMD2PDF.exe is a commandline executable.
 
-##Preferences
-The preferences for MMD2PDF can be defined in the mmd2pdf.ini file in same directory as the mmd2pdf.exe file.
+##Settings
+mmd2pdf is made to be as flexible as possible, but with a lot of default options to use immediately.
+There are three files which define the transforming process and how a document will look:
+
+* The preferences - mmd2pdf.prf
+* The defintions - [documentname].def
+* The styles - [stylename].sty
+
+###The preferences
+The preferences for MMD2PDF can be defined by the mmd2pdf.prf file which is located in same directory as the mmd2pdf.exe file.
 
 The following preferences can be used:
 
-    [MMD2PDF]
-    OpenDocument = true
-    AutoOverwrite = true
-    AutoNewLines = true ; when true, RETURN becomes a literal newline
-    PageBreak = [PAGEBREAK]
-    Template = default
+    OpenDocument: yes/no
+    AutoOverwrite: yes/no
+    AutoNewLines: yes/no - when yes, RETURN becomes a literal newline
+    Test: [Undocumented Feature]
 
-    [wkhtmltopdf]
+Also any wkhtmltopdf option can be used, for example:
+
     --print-media-type
     --orientation Portrait
     --margin-top 10mm
     --margin-bottom 10mm
     --margin-right 10mm
     --margin-left 10mm
-    --encoding A4
     --page-size A4
     --disable-external-links
     --redirect-delay 0
     --disable-javascript
 
-#Definitions
+### The definitions
 The definitions for a document, how a document is processed, can be defined in the [pagename].def file in the same directory as the document.
 For example, if the Markdown document is document.txt the definitions file will be the document.def file.
 
 The following definitions can be used:
 
+ * Style=[style] (without .css or .sty)
  * PageBreakAtTopLevel
- * Style
  * MultiMarkDown definitions.  
    The MultiMarkDown executable will handle these definitions as if they are on top of the page.
  * MultiMarkDown Image/Link references, after an empty line.  
    The MultiMarkDown executable will handle these references as if they are in the document. This makes it possible to seperate the references from the document.
 
-###MMD2PDF Preferences
-The Preferences for mmd2pdf can be changed by editing in the mmd2pdf.ini file.
-This file is located in the same directory as the mmd2pdf executable file.
-The possible settings are:
-
-    \[MMD2PDF\]
-    OpenDocument = true
-    AutoOverwrite = true
-    AutoNewLines = true ; when true, RETURN becomes a literal newline
-    PageBreak = \[PAGEBREAK\]
-    Template = default
-    Title=`<Title`>
-    Style=`<style`> (without .css)
-    Test=<Undocumented Feature>
-
-###MultiMarkDown Settings
-\[MultiMarkDown\]
-Keywords:          MultiMarkdown, Markdown, XML, XHTML, XSLT, PDF
-CSS:               default.css
-
-###PDF Settings
-The pdf settings in mmd2pdf.ini are directly passed to wkhtmltopdf (without the "pdf").
-\[wkhtmltopdf\]
---print-media-type
---orientation Portrait
---margin-top 10mm
---margin-bottom 10mm
---margin-right 10mm
---margin-left 10mm
---encoding A4
---page-size A4
---disable-external-links
---redirect-delay 0
---disable-javascript
-
-Styles
-======
-MMD2PDF comes with the following styles:
+### The Styles
+MMD2PDF comes with a number of styles, for example: 
 
 * default - basic black and white pages
 * documentation - blue headers and tables, header and footer support
@@ -90,45 +60,34 @@ For viewing PDF presentations I recommend [SumatraPDF](http://blog.kowalczyk.inf
 
 ###Creating your own styles
 A mmd2pdf style consists of a .css and a .sty file.
-For the \<stylename\>.css any css styling can be used, but there are some considerations: 
+For the [stylename].css any css styling can be used, but there are some considerations: 
 
 * Scrollbars  
   Sometimes scrollbars will appear, for example if an image is larger than the page size. To prevent this the image or text must be made smaller. No scrollbars will be shown if the following css style is used (the *default* style has this behavior):  
   `::-webkit-scrollbar { display: none; }`
 * The best way to handle large images and text blocks is to use `max-width: 100%;`
 
-The \<stylename\>.sty has the following options:
+In the [stylename].sty any of the wkhtmltopdf option can be used, it will override options defines in mmd2pdf.prf.
 
-Key                 | Value          | Description
---------------------|----------------|------------
---orientation       | Portrait / Landscape
-                    |
---header-center     |[title]
---header-font-name  | "Verdana, Geneva, sans-serif"
---header-font-size  | 8
---header-line       |
-                    |
---footer-line       |
---footer-right      | [page]/[topage]
---footer-font-name  | "Verdana, Geneva, sans-serif"
---footer-font-size  | 8
-                    |
---footer-center     | footer.html 
+#Pagebreaks
+Don't let Webkit decide where to put pagebreaks for you because you won't like the result!
 
-MMD2PDF Document Specialties
-============================
-
-##Pagebreaks
-To start Text at the beginning of a page a pagebreak kan be used.
+To start a line of text at the beginning of a new page a pagebreak kan be used.
 The pagebreak identifier is : \[PAGEBREAK\] on a seperate line.
 
-It is also possible to place every start of a markdown top level at a different page, by adding `PageBreakAtTopLevel: 1` to the [pagename].def file.
+It is also possible to place every start of a markdown top level (except the first) at a different page, by adding `PageBreakAtTopLevel: 1` to the [pagename].def file.
 
 ##Special characters
 Special characters for pronunciation (diacritics) will be correctly converted, whether the source file is in ANSI, UTF-8 or UTF-8 without BOM encoding. Examples of these characters are:
 > á, ä, à, â, æ, ç, é, ë, è, ê, í, ï, ì, î, ó, ö, ò, ô, š, ú, ü, ù, û
 
+SumatraPDF
+==========
+The most PDF Readers will not update the view if the pdf changes. This is not a nice if you want to view the results often: first the PDF Reader must be closed, the mmd2pdf must be started which will launch the PDF Reader again.
 
+But SumatraPDF automatically refreshes the display if a new new pdf is created. It does not have to be closed down to view the new PDF.
+
+Another reason to use SumatraPDF is the presentation mode, this will show one PDF in full screen. 
 
 Text Editor support
 ===================
@@ -136,19 +95,19 @@ MMD2PDF can easily be used in a text editor. For example in Notepad++, create th
 
     $(NPP_DIRECTORY)\MMD2PDF\MMD2PDF.exe "$(FULL_CURRENT_PATH)"
 
-Links
------
-[MultiMarkDown](http://fletcher.github.com/peg-multimarkdown)
-[MultiMarkdown Readme]: http://fletcher.freeshell.org/wiki/MultiMarkdown 'MultiMarkdown Readme'
-[MarkDown](http://daringfireball.net/projects/markdown)
-[wkhtmltopdf](http://madalgo.au.dk/~jakobt/wkhtmltoxdoc/wkhtmltopdf-0.9.9-doc.html)
-[Markdown syntax highlighting module for Notepad++](https://github.com/thomsmits/markdown_npp)
+Acknowledgements
+================
+MMD2PDF would not exist without these great projects:
 
-Webpage Example
----------------
-The next page show an example of a webpage included in the document. It can be a local HTML page or a Website on the Internet.
-This can be done by using the following command on a seperate textline:
+* [MultiMarkDown](http://fletcher.github.com/peg-multimarkdown)
+* [MarkDown](http://daringfireball.net/projects/markdown)
+* [WkHtmlToPdf](http://code.google.com/p/wkhtmltopdf)
+* [AutoIt](http://www.autoitscript.com)
+* [SumatraPDF](http://blog.kowalczyk.info/software/sumatrapdf/free-pdf-reader.html)
+* [A collection of css themes for Markdown](http://jasonm23.github.com/markdown-css-themes)
 
-    [WEBPAGE=http://code.google.com/p/mmd2pdf]
-    
-[WEBPAGE=http://code.google.com/p/mmd2pdf]
+Useful links
+------------
+* [MultiMarkdown Readme](http://fletcher.freeshell.org/wiki/MultiMarkdown)
+* [WkHtmlToPdf Manual](http://madalgo.au.dk/~jakobt/wkhtmltoxdoc/wkhtmltopdf-0.9.9-doc.html)
+* [Markdown syntax highlighting module for Notepad++](https://github.com/thomsmits/markdown_npp)

@@ -11,7 +11,6 @@ html body {
   margin-left:20px;
   margin-right:0px;
   line-height: 1.2;
-  width: 750px;
   text-align: justify;
   font-family: "Verdana, Geneva, sans-serif";
   font-size: 14px;
@@ -38,6 +37,7 @@ body pre {
   font-family: monospace;
   background-color: #eeeeee;
   border: 1px solid #ccc;
+  padding: 5px;
 }
 
 pre, code{
@@ -49,6 +49,7 @@ pre, code{
 
 img {
   max-width: 100%;
+  -webkit-transform: rotate(90deg);
 }
 
 dl {
