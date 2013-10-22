@@ -1,0 +1,13 @@
+Test: Yes
+OpenDocument: yes
+AutoOverwrite: Yes
+AutoNewLines: No
+ClosePdfViewerWindowTitle: STDU Viewer
+
+--print-media-type
+--margin-top 10mm
+--margin-bottom 10mm
+--margin-right 10mm
+--margin-left 10mm
+--page-size A4
+--disable-smart-shrinking
