@@ -1,16 +1,16 @@
 #include-once
 
 Func getIni()
-	Local $file, $handle, $line, $section = 0
+	Local $file, $handle, $line, $item
 
 	; check ini file
-	$file = @ScriptDir & '\mmd2pdf.ini'
+	$file = @ScriptDir & '\mmd2pdf.prf'
 	If Not FileExists($file) = 1 Then
-		ConsoleWrite("No mmd2pdf.ini preferences file found" & @CRLF)
+		ConsoleWrite("No mmd2pdf.prf preferences file" & @CRLF)
 		Return
 	EndIf
 
-	If $TEST Then ConsoleWrite("Ini file: " & $file & @CRLF)
+	If $TEST Then ConsoleWrite("Prf file: " & $file & @CRLF)
 
 	; open File
 	$handle = FileOpen($file, 0)
@@ -20,43 +20,50 @@ Func getIni()
 	While 1
 		$line = FileReadLine($handle)
 		If @error = -1 Then ExitLoop
-		If $line = "[MMD2PDF]" Then
-			$section = 1
-			ContinueLoop
-		EndIf
-		If $line = "[MultiMarkDown]" Then
-			$section = 2
-			ContinueLoop
-		EndIf
-		If $line = "[wkhtmltopdf]" Then
-			$section = 3
-			$WKPARAMS = ""
-			ContinueLoop
-		EndIf
-		If $section = 1 Then
-			If StringInStr($line, "closepdfviewerwindowtitle") = 1 Then
-				$CLOSE_PDFVIEWER_WINDOWTITLE = StringRegExpReplace($line, ".*=[ ]*", "")
-				If $TEST Then ConsoleWrite("ClosePdfViewerWindowTitle:" & $CLOSE_PDFVIEWER_WINDOWTITLE & @CRLF)
+
+		If StringInStr($line, "test") = 1 Then
+			$TEST = 1
+			If StringInStr($line, "n", 0, 1, 5) <> 0 Then
+				$TEST = 0
 			EndIf
-			If StringRegExp($line, 'Test') = 1 And StringRegExp($line, '^[^;]*true') <> 0 Then $TEST = 1
-			If StringRegExp($line, '(O|o)pen(D|d)ocument') = 1 And StringRegExp($line, '^[^;]*true') <> 1 Then $OPENDOC = 0
-			If StringRegExp($line, '(A|a)uto(O|o)verwrite') = 1 And StringRegExp($line, '^[^;]*true') = 1 Then $AUTOOVERWRITE = 0
-			If StringRegExp($line, '(A|a)uto(N|n)ew(L|l)ines') = 1 And StringRegExp($line, '^[^;]*true') <> 1 Then $NEWLINE = 0
-			If StringRegExp($line, '(P|p)age(B|b)reak') = 1 Then
-				$PAGEBREAK = StringRegExpReplace($line, ".*=[ ]*", "")
-			EndIf
-			If StringRegExp($line, '(O|o)utput') = 1 Then
-				$OUTPUT = StringLower(StringRegExpReplace($line, ".*=[^\w]*(f|)", ""))
-			EndIf
-			If StringRegExp($line, '(O|o)ffice(E|e)xe') = 1 Then
-				$OFFICE = StringRegExpReplace($line, ".*=[^\w]*", "")
-			EndIf
+			If $TEST Then ConsoleWrite("Test: " & $TEST & @CRLF)
 		EndIf
-		If $section = 2 Then
-			;$MMDHEADER &= $line & "  " & @CRLF
+		If StringInStr($line, "closepdfviewerwindowtitle") = 1 Then
+			$CLOSE_PDFVIEWER_WINDOWTITLE = StringRegExpReplace($line, ".*=[ ]*", "")
+			If $TEST Then ConsoleWrite("ClosePdfViewerWindowTitle: " & $CLOSE_PDFVIEWER_WINDOWTITLE & @CRLF)
 		EndIf
-		If $section = 3 Then
-			$WKPARAMS &= $line & " "
+		If StringInStr($line, "opendocument") = 1 Then
+			$OPENDOC = 1
+			If StringInStr($line, "n", 0, 1, 12) <> 0 Then
+				$OPENDOC = 0
+			EndIf
+			If $TEST Then ConsoleWrite("OpenDocument: " & $OPENDOC & @CRLF)
+		EndIf
+		If StringInStr($line, "autooverwrite") = 1 Then
+			$AUTOOVERWRITE = 1
+			If StringInStr($line, "n", 0, 1, 13) <> 0 Then
+				$AUTOOVERWRITE = 0
+			EndIf
+			If $TEST Then ConsoleWrite("AutoOverwrite: " & $AUTOOVERWRITE & @CRLF)
+		EndIf
+		If StringInStr($line, "autonewlines") = 1 Then
+			$NEWLINE = 1
+			If StringInStr($line, "n", 0, 1, 13) <> 0 Then
+				$NEWLINE = 0
+			EndIf
+			If $TEST Then ConsoleWrite("AutoNewlines: " & $NEWLINE & @CRLF)
+		EndIf
+		; WkHTML2PDF definitions
+		If StringInStr($line, "--") = 1 Then
+			$item = StringRegExpReplace($line, "\s+\w*", "")
+			; override (replace)if exists
+			If StringInStr($WKPARAMS, $item) > 0 Then
+				$WKPARAMS = StringRegExpReplace($WKPARAMS, $item & "[^-]*", $line & " ")
+				If $TEST Then ConsoleWrite("wkhtmltopdf param " & $item & " replaced by " & $line & @CRLF)
+			Else
+				$WKPARAMS = $line & " " & $WKPARAMS
+				If $TEST Then ConsoleWrite("wkhtmltopdf param: " & $line & @CRLF)
+			EndIf
 		EndIf
 	WEnd
 
@@ -64,7 +71,7 @@ Func getIni()
 EndFunc   ;==>getIni
 
 Func getDef()
-	Local $file, $handle, $line
+	Local $file, $handle, $line, $item
 
 	$file = $DIR & "\" & $DOCNAME & ".def"
 
@@ -85,7 +92,8 @@ Func getDef()
 		$line = FileReadLine($handle)
 		If @error = -1 Then ExitLoop
 
-		If Not StringRegExp($line, '^[\w ]*:.*') Then ExitLoop
+		; check for mmd2pdf or wkhtml2pdf definitions
+		If Not StringRegExp($line, '^.*:.*') And Not StringInStr($line, "--") = 1 Then ExitLoop
 
 		If StringInStr($line, "style") = 1 Then
 			If StringInStr($line, '.css') = 0 Then
@@ -132,6 +140,18 @@ Func getDef()
 		If StringInStr($line, "copyright") > 0 Then
 			;$TITLE = StringRegExpReplace($line, ".*=[^\w]*", "")
 		EndIf
+		; WkHTML2PDF definitions
+		If StringInStr($line, "--") = 1 Then
+			$item = StringRegExpReplace($line, "\s+\w*", "")
+			; override (replace)if exists
+			If StringInStr($WKPARAMS, $item) > 0 Then
+				$WKPARAMS = StringRegExpReplace($WKPARAMS, $item & "[^-]*", $line & " ")
+				If $TEST Then ConsoleWrite("wkhtmltopdf param " & $item & " replaced by " & $line & @CRLF)
+			Else
+				$WKPARAMS = $line & " " & $WKPARAMS
+				If $TEST Then ConsoleWrite("wkhtmltopdf param: " & $line & @CRLF)
+			EndIf
+		EndIf
 	WEnd
 
 	; continue - assume the rest to be top of the MMD Document
@@ -147,7 +167,7 @@ Func getDef()
 EndFunc   ;==>getDef
 
 Func getStyle()
-	Local $file, $handle, $line
+	Local $file, $handle, $line, $item
 
 	If StringLen($STYLE) > 0 Then
 		$file = @ScriptDir & "\styles\" & $STYLE & ".sty"
@@ -172,17 +192,27 @@ Func getStyle()
 			If @error = -1 Then ExitLoop
 
 			If StringInStr($line, "--") = 1 Then
-				If $PDF_HEADER And StringInStr($line, "--header") = 1 Then
-					$line = StringReplace($line, "[headertitle]", $TITLE)
-					$WKPARAMS &= " " & $line
-					If $TEST Then ConsoleWrite("wkhtmltopdf parameter:" & $line & @CRLF)
-				ElseIf $PDF_FOOTER And StringInStr($line, "--footer") = 1 Then
-					$WKPARAMS &= " " & $line
-					If $TEST Then ConsoleWrite("wkhtmltopdf parameter:" & $line & @CRLF)
-				ElseIf StringInStr($line, "--orientation") = 1 Then
-					$WKPARAMS &= " " & $line
-				ElseIf StringInStr($line, "--page") = 1 Then
-					$WKPARAMS &= " " & $line
+				If StringInStr($line, "--header") = 1 Then
+					If $PDF_HEADER Then
+						$line = StringReplace($line, "[headertitle]", $TITLE)
+						$WKPARAMS = $line & " " & $WKPARAMS
+						If $TEST Then ConsoleWrite("wkhtmltopdf header parameter: " & $line & @CRLF)
+					EndIf
+				ElseIf StringInStr($line, "--footer") = 1 Then
+					If $PDF_FOOTER Then
+						$WKPARAMS = $line & " " & $WKPARAMS
+						If $TEST Then ConsoleWrite("wkhtmltopdf footer parameter: " & $line & @CRLF)
+					EndIf
+				Else
+					$item = StringRegExpReplace($line, "\s+\w*", "")
+					; override (replace)if exists
+					If StringInStr($WKPARAMS, $item) > 0 Then
+						$WKPARAMS = StringRegExpReplace($WKPARAMS, $item & "[^-]*", $line & " ")
+						If $TEST Then ConsoleWrite("wkhtmltopdf param " & $item & " replaced by " & $line & @CRLF)
+					Else
+						$WKPARAMS = $line & " " & $WKPARAMS
+						If $TEST Then ConsoleWrite("wkhtmltopdf param: " & $line & @CRLF)
+					EndIf
 				EndIf
 			EndIf
 		WEnd

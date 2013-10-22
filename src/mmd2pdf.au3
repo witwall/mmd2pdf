@@ -7,7 +7,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=multimarkdown, wkhtml2pdf
 #AutoIt3Wrapper_Res_Description=MultiMarkDown to PDF Converter
-#AutoIt3Wrapper_Res_Fileversion=0.5.0.2
+#AutoIt3Wrapper_Res_Fileversion=0.5.0.28
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_AU3Check_Parameters=-d
@@ -21,18 +21,19 @@ Global Const $APPTITLE = "MMD2PDF"
 Global $TEST = 0
 Global $MMDEXE = @ScriptDir & '\mmd\multimarkdown.exe'
 Global $HTML2PDFEXE = @ScriptDir & '\wkhtmltopdf\wkhtmltopdf.exe'
+Global $SUMATRAEXE = @ScriptDir & '\sumatrapdf\SumatraPDF.exe'
 Global $DIR = @ScriptDir
 Global $DOCNAME = ""
 Global $INFILES = ""
 Global $PDFFILE = ""
-Global $WKPARAMS = "--print-media-type --margin-top 5mm --margin-bottom 5mm --margin-right 5mm --margin-left 5mm --encoding A4 --page-size A4 --disable-smart-shrinking"
+Global $WKPARAMS = "--print-media-type --margin-top 5mm --margin-bottom 5mm --margin-right 5mm --margin-left 5mm --page-size A4 --disable-smart-shrinking"
 Global $PDF_HEADER = 0
 Global $PDF_FOOTER = 0
 Global $PDF_TOC = 0
 Global $PDF_OUTLINE = 0
 Global $CLOSE_PDFVIEWER_WINDOWTITLE = "Adobe Reader"
-Global $OPENDOC = 1 ; Default: Open Document
-Global $AUTOOVERWRITE = 1 ; Default: Ask to overwrite
+Global $OPENDOC = 2 ; 1: Open Document, 2: Open with SumatraPDF (Default)
+Global $AUTOOVERWRITE = 0 ; Default: Ask to overwrite
 Global $NEWLINE = 1 ; Default: AutoNewLine
 Global $TITLE = ""
 Global $MMDHEADER = ""
@@ -93,7 +94,7 @@ $tempFiles = ReadFiles($INFILES)
 
 ; check output file
 If FileExists($PDFFILE) = 1 Then
-	If $AUTOOVERWRITE Then
+	If Not $AUTOOVERWRITE Then
 		If MsgBox(0x1031, $APPTITLE, $PDFFILE & " already exists! Overwrite?") <> 1 Then
 			Exit
 		EndIf
@@ -109,14 +110,23 @@ If $TEST Then ConsoleWrite("Temp file(s): " & $tempFiles & @CRLF)
 
 HTML2PDF($tempFiles, $PDFFILE)
 
-If $OPENDOC Then
+$OPENDOC = 2
+If $OPENDOC > 0 Then
 	If FileExists($PDFFILE) Then
-		; Close Viewer
-		WinClose($CLOSE_PDFVIEWER_WINDOWTITLE)
+		If $OPENDOC = 1 Then
+			; Close Viewer
+			WinClose($CLOSE_PDFVIEWER_WINDOWTITLE)
 
-		; Open a .pdf file with it's default editor
-		ShellExecute($PDFFILE, "", $DIR)
+			; Open a .pdf file with it's default editor
+			ShellExecute($PDFFILE, "", $DIR)
+		Else
+			If Not WinExists($DOCNAME & ".pdf") Then
+				Run($SUMATRAEXE & " """ & $PDFFILE & """", $DIR)
+			EndIf
+			WinActivate($DOCNAME & ".pdf")
+		EndIf
 	EndIf
 EndIf
 
 Exit
+
