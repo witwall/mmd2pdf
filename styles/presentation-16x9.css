@@ -1,0 +1,47 @@
+body {
+  height: 980px;
+  margin: 0;
+  padding: 100px;
+  color: #FFFFFF;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 3em;
+  background-image: -webkit-gradient(linear, right bottom, left top, color-stop(0.10, #000044), color-stop(0.90, #024d02));
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: 100%;
+}
+
+h1, h2, h3 {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+  color: #FFFFFF;
+}
+
+h1 {
+  font-size: 3em;
+}
+
+h2 {
+  font-size: 2.6em;
+}
+
+h3 {
+  font-size: 1.6em;
+}
+
+p, ul, ol {
+  margin-top: 0;
+  line-height: 180%;
+}
+
+ul, ol {
+}
+
+a {
+  text-decoration: none;
+  color: #FF3000;
+}
+
+a:hover {
+}

@@ -7,7 +7,7 @@
 #AutoIt3Wrapper_Change2CUI=y
 #AutoIt3Wrapper_Res_Comment=multimarkdown, wkhtml2pdf
 #AutoIt3Wrapper_Res_Description=MultiMarkDown to PDF Converter
-#AutoIt3Wrapper_Res_Fileversion=0.5.0.28
+#AutoIt3Wrapper_Res_Fileversion=0.7.0.2
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_AU3Check_Parameters=-d
@@ -18,7 +18,7 @@ Opt("TrayMenuMode", 1) ; Default tray menu items (Script Paused/Exit) will not b
 Opt("WinTitleMatchMode", 2) ; Match Substring of Window Title
 
 Global Const $APPTITLE = "MMD2PDF"
-Global $TEST = 0
+Global $DEBUG = 0
 Global $MMDEXE = @ScriptDir & '\mmd\multimarkdown.exe'
 Global $HTML2PDFEXE = @ScriptDir & '\wkhtmltopdf\wkhtmltopdf.exe'
 Global $SUMATRAEXE = @ScriptDir & '\sumatrapdf\SumatraPDF.exe'
@@ -26,7 +26,7 @@ Global $DIR = @ScriptDir
 Global $DOCNAME = ""
 Global $INFILES = ""
 Global $PDFFILE = ""
-Global $WKPARAMS = "--print-media-type --margin-top 5mm --margin-bottom 5mm --margin-right 5mm --margin-left 5mm --page-size A4 --disable-smart-shrinking"
+Global $WKPARAMS = "--print-media-type --dpi 300 --margin-top 5mm --margin-bottom 5mm --margin-right 5mm --margin-left 5mm --page-size A4 --disable-smart-shrinking"
 Global $PDF_HEADER = 0
 Global $PDF_FOOTER = 0
 Global $PDF_TOC = 0
@@ -48,7 +48,7 @@ Global $OFFICE = ""
 #include "parse.au3"
 #include "config.au3"
 
-Dim $path, $fullPath, $i, $aPath, $pages = 0, $tempFiles, $document
+Dim $path, $fullPath, $i, $aPath, $pages = 0, $tempFiles, $document, $var, $fileList
 
 ConsoleWrite($APPTITLE & " V" & FileGetVersion(@ScriptDir & "\" & @ScriptName, "FileVersion") & @CRLF)
 
@@ -70,22 +70,45 @@ If $cmdline[0] > 0 Then
 		If StringLen($DOCNAME) = 0 Then $DOCNAME = $document
 		$INFILES &= Chr(34) & $DIR & "\" & $document & "." & $aPath[2] & Chr(34) & " "
 		; More than 1 file --> automatic outline
-		If $i > 1 Then
-			$PDF_OUTLINE = 1
-		EndIf
+		If $i > 1 Then $PDF_OUTLINE = 1
 	Next
-	$PDFFILE = $DIR & "\" & $DOCNAME & ".pdf"
-	$TITLE = $DOCNAME
 Else
-	ConsoleWrite("usage: " & @ScriptName & " multimarkdownfile.txt [textfile2.txt ...]")
-	Exit
+	$var = FileOpenDialog("Select one or more (Multi)Markdown documents to convert to pdf", $DIR, "Text (*.txt)|Markdown (*.md;*.mmd)", 1 + 4)
+	If Not @error Then
+		$fileList = StringSplit($var, "|")
+		If $fileList[0] > 1 Then
+			$DIR = $fileList[1]
+			For $i = 2 To $fileList[0]
+				;MsgBox(0x1010, $APPTITLE, $fileList[$i])
+				If StringLen($DOCNAME) = 0 Then $DOCNAME = StringLeft($fileList[$i], StringInStr($fileList[$i], ".", 0, -1))
+				$INFILES &= Chr(34) & $fileList[$i] & Chr(34) & " "
+			Next
+			; More than 1 file --> automatic outline
+			If $i > 1 Then $PDF_OUTLINE = 1
+		Else
+			;MsgBox(0x1010, $APPTITLE, $fileList[1])
+			; get path array
+			$aPath = StringRegExp($fileList[1], '(.*)[\/\\]([^\/\\]+)\.(\w+)$', 1) ; 0=Path, 1=Filename without ext
+			$DIR = $aPath[0]
+			$document = $aPath[1]
+			; Set Main Document
+			$DOCNAME = $document
+			$INFILES &= Chr(34) & $DIR & "\" & $document & "." & $aPath[2] & Chr(34) & " "
+		EndIf
+	Else
+		ConsoleWrite("usage: " & @ScriptName & " multimarkdownfile.txt [textfile2.txt ...]")
+		Exit
+	EndIf
 EndIf
+
+$PDFFILE = $DIR & "\" & $DOCNAME & ".pdf"
+$TITLE = $DOCNAME
 
 getIni()
 getDef()
 getStyle()
 
-If $TEST Then
+If $DEBUG Then
 	ConsoleWrite("File(s): " & $INFILES)
 	ConsoleWrite("Output to: " & $OUTPUT & @CRLF)
 EndIf
@@ -105,7 +128,7 @@ If FileExists($PDFFILE) = 1 Then
 	EndIf
 EndIf
 
-If $TEST Then ConsoleWrite("Temp file(s): " & $tempFiles & @CRLF)
+If $DEBUG Then ConsoleWrite("Temp file(s): " & $tempFiles & @CRLF)
 ; add include http:// to tempfiles
 
 HTML2PDF($tempFiles, $PDFFILE)
@@ -129,4 +152,3 @@ If $OPENDOC > 0 Then
 EndIf
 
 Exit
-

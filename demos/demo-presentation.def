@@ -1,7 +1,6 @@
-Title: Demo 1
+Title: Slides/Presentation Demo
 Style: presentation
-Keywords: Demo   
-Copyright: 2013 Legobas
-PageBreakAtTopLevel: y
+#Style: presentation-4x3
+#Style: presentation-16x9
 Header: y
 Footer: y
