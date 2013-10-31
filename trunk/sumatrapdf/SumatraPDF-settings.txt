@@ -51,8 +51,8 @@ UseSysColors = false
 EnableTeXEnhancements = false
 DefaultDisplayMode = automatic
 DefaultZoom = fit page
-WindowState = 1
-WindowPos = 342 0 944 728
+WindowState = 2
+WindowPos = 250 35 842 645
 ShowToc = true
 SidebarDx = 324
 TocDy = 0
@@ -61,4 +61,4 @@ ShowStartPage = true
 FileStates [
 ]
 TimeOfLastUpdateCheck = 0 0
-OpenCountWeek = 146
+OpenCountWeek = 147

@@ -1,5 +1,15 @@
 @ECHO OFF
 ..\mmd2pdf demo.txt
+..\mmd2pdf demo-markdown1.txt
+..\mmd2pdf demo-markdown2.txt
+..\mmd2pdf demo-markdown3.txt
+..\mmd2pdf demo-markdown4.txt
+..\mmd2pdf demo-markdown5.txt
+..\mmd2pdf demo-markdown6.txt
+..\mmd2pdf demo-markdown7.txt
+..\mmd2pdf demo-markdown8.txt
+..\mmd2pdf demo-markdown9.txt
+..\mmd2pdf demo-markdown10.txt
 ..\mmd2pdf demo-documentation.txt
 ..\mmd2pdf demo-presentation.txt
 ..\mmd2pdf demo-book.txt

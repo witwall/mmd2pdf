@@ -4,7 +4,7 @@
 Func ReadFiles($files)
 	Local $Text, $line, $i, $in, $pos, $fileList, $firstTopLevel, $getHeader = 1
 
-	If $TEST Then ConsoleWrite("Files: " & $files & @CRLF)
+	If $DEBUG Then ConsoleWrite("Files: " & $files & @CRLF)
 
 	$fileList = StringSplit($files, """ """, 1)
 	For $i = 1 To $fileList[0]
@@ -32,7 +32,7 @@ Func ReadFiles($files)
 					If @error = -1 Then ExitLoop
 				WEnd
 
-				If $TEST Then ConsoleWrite("MMD Header:" & @CRLF & $MMDHEADER & @CRLF)
+				If $DEBUG Then ConsoleWrite("MMD Header:" & @CRLF & $MMDHEADER & @CRLF)
 			EndIf
 
 			; detect pagebreaks
@@ -66,7 +66,7 @@ Func ReadFiles($files)
 		FileClose($in)
 	Next
 
-	If $TEST Then ConsoleWrite($Text & @CRLF)
+	If $DEBUG Then ConsoleWrite($Text & @CRLF)
 
 	Return Text2HTML($Text)
 EndFunc
@@ -77,7 +77,7 @@ Func Text2HTML($inTXT)
 	; Split text in lines on CRLF
 	$lines = StringSplit($inTXT, @CRLF, 1)
 
-	If $TEST Then ConsoleWrite($lines[0] & " lines of text..." & @CRLF)
+	If $DEBUG Then ConsoleWrite($lines[0] & " lines of text..." & @CRLF)
 
 	For $i = 1 To $lines[0]
 		$line = $lines[$i]
@@ -133,7 +133,7 @@ Func Text2HTML($inTXT)
 			$Header &= $MMDHEADER & @CRLF
 
 			FileWriteLine($out, $Header)
-			If $TEST Then ConsoleWrite("Header: " & @CRLF & $Header & @CRLF)
+			If $DEBUG Then ConsoleWrite("Header: " & @CRLF & $Header & @CRLF)
 		EndIf
 
 		; Don't show Pagebreak command
@@ -204,6 +204,12 @@ Func HTML2PDF($inHTMLs, $outPDF)
 	local $tempDir
 
 	; wkhtmltopdf --print-media-type --margin-top 4mm --margin-bottom 4mm --margin-right 0mm --margin-left 0mm --encoding A4 --page-size A4 --orientation Portrait --redirect-delay 100 test1.html test.pdf
+
+	; PDF Title
+	If StringInStr($WKPARAMS, "--title") = 0 Then
+		$WKPARAMS &= ' --title "' & $TITLE & '"'
+	EndIf
+	; PDF Outline
 	If $PDF_OUTLINE > 0 Then
 		$WKPARAMS &= " --outline"
 		If $PDF_OUTLINE > 1 Then $WKPARAMS &= " --outline-depth " & $PDF_OUTLINE
@@ -213,7 +219,7 @@ Func HTML2PDF($inHTMLs, $outPDF)
 	$WKPARAMS &= " " & $inHTMLs & " "
 	$WKPARAMS &= '"' & $outPDF & '"'
 
-	If $TEST Then ConsoleWrite("WK Params:" & @CRLF & $WKPARAMS & @CRLF & $DIR & @CRLF)
+	If $DEBUG Then ConsoleWrite("WK Params:" & @CRLF & $WKPARAMS & @CRLF & $DIR & @CRLF)
 	;Set working directory to HTML File for included files!
 	$tempDir = @WorkingDir
 	FileChangeDir(@TempDir & "\MMD2PDF")
@@ -225,7 +231,7 @@ Func HTML2PDF($inHTMLs, $outPDF)
 	;Set working directory back
 	FileChangeDir($tempDir)
 
-	If Not $TEST Then
+	If Not $DEBUG Then
 		FileDelete(@TempDir & "\MMD2PDF")
 	EndIf
 EndFunc   ;==>HTML2PDF

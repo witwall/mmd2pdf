@@ -69,6 +69,24 @@ For the [stylename].css any css styling can be used, but there are some consider
 
 In the [stylename].sty any of the wkhtmltopdf option can be used, it will override options defines in mmd2pdf.prf.
 
+#PDF Slides
+A PDF Slides document is simply a pdf which contains pages made to be displayed on a screen or beamer instead of paper. When displayed fullscreen such a pdf can be used as a simple powerpoint presentation.
+
+This can be done by creating pages which have a screen-like aspect orientation. One way to achieve this is to use landscape orientation. Usually a larger font size will be used for the slides.
+
+SumatraPDF has a presentation mode, which can be activated by the key combination Ctrl-L.
+
+To create Markdown Slides with mmd2pdf:
+
+* Use one of these styles:
+    * presentation - for general use.
+    * presentation-4x3 - for a 1600*1200 or 800*600 (4:3 aspect ratio) screen or beamer.
+    * presentation-16x9 - for a 1600*1200 or 800*600 (16:9 aspect ratio) screen or beamer.
+    * markdown1 - Demo style
+
+* Keep the text on one page
+    This prevents webkit from applying pagebreaks.
+
 #Pagebreaks
 Don't let Webkit decide where to put pagebreaks for you because you won't like the result!
 
